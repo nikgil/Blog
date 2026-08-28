@@ -1,0 +1,32 @@
+package dev.sirnik.blog.controllers;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import dev.sirnik.blog.models.BlogPost;
+import dev.sirnik.blog.utils.TestModelGenerator;
+
+@Controller
+public class HomeController {
+
+    @GetMapping("/")
+    public String home(Model model) {
+        return "index";
+    }
+
+    @GetMapping("/test-home")
+    public String testHome(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        Model model
+    ) {
+        System.out.println(page);
+        List<BlogPost> samplePosts = TestModelGenerator.generatePosts(page);
+        model.addAttribute("posts", samplePosts);
+        model.addAttribute("nextPage", page+1);
+        return "index";
+    }
+}
