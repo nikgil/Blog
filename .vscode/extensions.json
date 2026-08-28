@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "sonarsource.sonarlint-vscode",
+        "prmichaelsen.freemarker-vscode",
+        "mzlogin.vscode-freemarker-formatter",
+        "inferrinizzard.prettier-sql-vscode",
+        "redhat.vscode-xml"
+    ]
+}

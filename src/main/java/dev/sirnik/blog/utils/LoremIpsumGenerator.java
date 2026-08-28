@@ -1,7 +1,6 @@
 package dev.sirnik.blog.utils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,7 +41,7 @@ public final class LoremIpsumGenerator {
         try {
             URI resourcePath = BlogApplication.class.getResource("/static/loremipsum.txt").toURI();
             Path path = Paths.get(resourcePath);
-        
+
             text = Files.readString(path);
         } catch (IOException e) {
             throw new UncheckedIOException("Could not read classpath resource for Lorem Ipsum", e);
@@ -65,7 +64,7 @@ public final class LoremIpsumGenerator {
         StringJoiner result = new StringJoiner(separator);
         for (int index = 0; index < amount; index++) {
             String value = values.get(index % values.size());
-            if(wrapHTML) {
+            if (wrapHTML) {
                 value = "<p>" + value + "</p>";
             }
 

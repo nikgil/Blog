@@ -20,13 +20,21 @@ public class HomeController {
 
     @GetMapping("/test-home")
     public String testHome(
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        Model model
-    ) {
-        System.out.println(page);
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
+            Model model) {
+        if (page > 0 && throttle) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                // Doesn't matter
+            }
+        }
         List<BlogPost> samplePosts = TestModelGenerator.generatePosts(page);
+
         model.addAttribute("posts", samplePosts);
-        model.addAttribute("nextPage", page+1);
+        model.addAttribute("nextPage", page + 1);
+        model.addAttribute("throttle", throttle);
         return "index";
     }
 }
