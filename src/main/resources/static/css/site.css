@@ -4,6 +4,14 @@
     padding-top: 1.5rem;
 }
 
+.post-preview__date {
+    color: var(--bulma-text-weak, #7a7a7a);
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+}
+
 .post-preview__tag-scroll {
     max-width: 100%;
     overflow-x: auto;

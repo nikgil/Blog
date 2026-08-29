@@ -13,7 +13,8 @@ public class TestModelGenerator {
     private static final int MAX_TAGS_PER_POST = 5;
 
     // Static class, no construction
-    private TestModelGenerator() {}
+    private TestModelGenerator() {
+    }
 
     public static List<BlogPost> generatePosts(int page) {
         String[] loremIpsumStrings = LoremIpsumGenerator.getWords(30).split(" ");
@@ -21,16 +22,17 @@ public class TestModelGenerator {
         Random seed = new Random(page);
         List<BlogPost> lst = new ArrayList<>();
 
-        for(int i = 0; i < VALUES_PER_PAGE; i++) {
-            String title = 
-                loremIpsumStrings[seed.nextInt(loremIpsumStrings.length)] 
-                + " " 
-                + loremIpsumStrings[seed.nextInt(loremIpsumStrings.length)];
-            BlogPost b = new BlogPost(title, title.replaceAll(" ", "_"), LoremIpsumGenerator.getParagraphs(seed.nextInt(1, 5), true));
+        for (int i = 0; i < VALUES_PER_PAGE; i++) {
+            String title = loremIpsumStrings[seed.nextInt(loremIpsumStrings.length)]
+                    + " "
+                    + loremIpsumStrings[seed.nextInt(loremIpsumStrings.length)];
+            BlogPost b = new BlogPost(title, title.replace(" ", "_"),
+                    LoremIpsumGenerator.getParagraphs(seed.nextInt(1, 5), true));
             List<Tag> tags = generateTags(page, seed.nextInt(1, MAX_TAGS_PER_POST));
-            
-            tags.forEach(t -> b.addTag(t));
 
+            tags.forEach(b::addTag);
+
+            b.setCreationTimestamps(); // This is done automatically in production
             lst.add(b);
         }
 
@@ -42,8 +44,8 @@ public class TestModelGenerator {
 
         Random seed = new Random(page);
         List<Tag> lst = new ArrayList<>();
-        
-        for(int i = 0; i < amount; i++) {
+
+        for (int i = 0; i < amount; i++) {
             String val = loremIpsumStrings[seed.nextInt(loremIpsumStrings.length)];
 
             lst.add(new Tag(val, val));
