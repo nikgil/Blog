@@ -1,0 +1,54 @@
+name: Coverage Badge
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - .github/badges/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: coverage-badge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-badge:
+    name: Update coverage badge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run tests and generate coverage report
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Generate coverage badge
+        uses: cicirello/jacoco-badge-generator@v2.12.1
+        with:
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
+          badges-directory: .github/badges
+          generate-workflow-summary: true
+
+      - name: Commit badge if it changed
+        run: |
+          git add .github/badges/jacoco.svg
+
+          if git diff --cached --quiet; then
+            echo "Coverage badge is unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update coverage badge"
+          git push

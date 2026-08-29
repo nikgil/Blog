@@ -8,15 +8,17 @@
         >
         <header class="mb-4">
             <h2 class="title is-4 mb-3">${post.title}</h2>
-
+            <time class="post-preview__date" datetime="${post.createdAt}">
+                ${postDateFormatter.format(post.createdAt)}
+            </time>
             <#if post.orderedTags?has_content>
-                <div class="post-preview__tag-scroll" role="region" aria-label="Tags for ${post.title}" tabindex="0">
-                    <div class="post-preview__tags tags" role="list">
+                <section class="post-preview__tag-scroll" aria-label="Tags for ${post.title}">
+                    <ul class="post-preview__tags tags">
                         <#list post.orderedTags as tag>
-                            <span class="tag is-light" role="listitem">${tag.name}</span>
+                            <li class="tag is-light">${tag.name}</li>
                         </#list>
-                    </div>
-                </div>
+                    </ul>
+                </section>
             </#if>
         </header>
 
@@ -25,10 +27,10 @@
         </div>
 
         <#if isLast>
-            <div class="post-preview__loading htmx-indicator" role="status" aria-live="polite">
+            <output class="post-preview__loading htmx-indicator" aria-live="polite">
                 <span class="post-preview__spinner" aria-hidden="true"></span>
                 <span class="is-sr-only">Loading more posts…</span>
-            </div>
+            </output>
         </#if>
     </article>
 </#macro>

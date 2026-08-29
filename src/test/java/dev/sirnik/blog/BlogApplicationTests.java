@@ -43,6 +43,7 @@ class BlogApplicationTests {
 				.andExpect(view().name("index"))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("post-preview__tag-scroll")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("post-preview__body")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"post-preview__date\"")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("post-preview__loading htmx-indicator")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("Loading more posts…")))
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("Lorem ipsum")));

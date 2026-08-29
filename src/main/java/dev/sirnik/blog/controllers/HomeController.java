@@ -1,6 +1,10 @@
 package dev.sirnik.blog.controllers;
 
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +17,10 @@ import dev.sirnik.blog.utils.TestModelGenerator;
 @Controller
 public class HomeController {
 
+    private static final DateTimeFormatter POST_DATE_FORMATTER = DateTimeFormatter
+            .ofLocalizedDate(FormatStyle.MEDIUM)
+            .withZone(ZoneOffset.UTC);
+
     @GetMapping("/")
     public String home(Model model) {
         return "index";
@@ -22,6 +30,7 @@ public class HomeController {
     public String testHome(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
+            Locale locale,
             Model model) {
         if (page > 0 && throttle) {
             try {
@@ -35,6 +44,7 @@ public class HomeController {
         model.addAttribute("posts", samplePosts);
         model.addAttribute("nextPage", page + 1);
         model.addAttribute("throttle", throttle);
+        model.addAttribute("postDateFormatter", POST_DATE_FORMATTER.withLocale(locale));
         return "index";
     }
 }
