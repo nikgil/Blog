@@ -2,7 +2,7 @@ name: Pull Request Checks
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -25,6 +25,69 @@ jobs:
 
       - name: Run tests and generate coverage report
         run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      # Use the exact commit targeted by the PR as the coverage baseline. The
+      # separate directory keeps its JaCoCo report away from the PR report.
+      - name: Check out base commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .coverage-base
+
+      - name: Generate base coverage report
+        working-directory: .coverage-base
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Enforce coverage drop limit
+        shell: bash
+        run: |
+          coverage_from_csv() {
+            awk -F, '
+              NR > 1 {
+                missed += $4
+                covered += $5
+              }
+              END {
+                total = missed + covered
+                if (total == 0) {
+                  exit 1
+                }
+                printf "%.6f", 100 * covered / total
+              }
+            ' "$1"
+          }
+
+          base_coverage=$(coverage_from_csv \
+            .coverage-base/target/site/jacoco/jacoco.csv)
+          pr_coverage=$(coverage_from_csv \
+            target/site/jacoco/jacoco.csv)
+          change=$(awk -v base="$base_coverage" -v pr="$pr_coverage" \
+            'BEGIN { printf "%.2f", pr - base }')
+
+          echo "Base coverage: ${base_coverage}%"
+          echo "PR coverage: ${pr_coverage}%"
+          echo "Change: ${change} percentage points"
+
+          {
+            echo "### JaCoCo coverage comparison"
+            echo ""
+            echo "| Revision | Instruction coverage |"
+            echo "| --- | ---: |"
+            echo "| Base | ${base_coverage}% |"
+            echo "| PR | ${pr_coverage}% |"
+            echo "| Change | ${change} percentage points |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          awk -v base="$base_coverage" -v pr="$pr_coverage" '
+            BEGIN {
+              drop = base - pr
+              if (drop > 5.0) {
+                printf "Coverage dropped by %.2f percentage points; " \
+                  "the maximum allowed drop is 5.00.\n", drop
+                exit 1
+              }
+            }
+          '
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4

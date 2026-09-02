@@ -40,6 +40,8 @@ public class HomeController {
             @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
             Locale locale,
             Model model) {
+        page = Math.max(0, page);
+
         if (page > 0 && throttle) {
             try {
                 Thread.sleep(3000);
