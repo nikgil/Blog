@@ -23,7 +23,7 @@
         </header>
 
         <div class="post-preview__body content">
-            ${post.content}
+            ${post.preview?html}
         </div>
 
         <#if isLast>

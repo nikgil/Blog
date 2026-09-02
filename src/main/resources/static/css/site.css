@@ -31,20 +31,7 @@
 }
 
 .post-preview__body {
-    display: -webkit-box;
-    overflow: hidden;
     overflow-wrap: anywhere;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
-}
-
-.post-preview__body> :first-child {
-    margin-top: 0;
-}
-
-.post-preview__body> :last-child {
-    margin-bottom: 0;
 }
 
 .post-preview__loading {

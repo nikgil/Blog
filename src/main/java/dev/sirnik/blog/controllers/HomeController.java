@@ -11,7 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import dev.sirnik.blog.models.BlogPost;
+import dev.sirnik.blog.models.projections.TestBlogPostPreview;
 import dev.sirnik.blog.utils.TestModelGenerator;
 
 @Controller
@@ -39,12 +39,15 @@ public class HomeController {
                 // Doesn't matter
             }
         }
-        List<BlogPost> samplePosts = TestModelGenerator.generatePosts(page);
+        List<TestBlogPostPreview> samplePosts = TestModelGenerator
+                .generatePosts(page).stream()
+                .map(TestBlogPostPreview::new).toList();
 
         model.addAttribute("posts", samplePosts);
         model.addAttribute("nextPage", page + 1);
         model.addAttribute("throttle", throttle);
-        model.addAttribute("postDateFormatter", POST_DATE_FORMATTER.withLocale(locale));
+        model.addAttribute("postDateFormatter",
+                POST_DATE_FORMATTER.withLocale(locale));
         return "index";
     }
 }

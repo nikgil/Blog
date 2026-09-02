@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import dev.sirnik.blog.utils.HTMLParser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +35,9 @@ public class BlogPost {
     private String slug;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    private String preview;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(nullable = false)
@@ -56,6 +60,7 @@ public class BlogPost {
         this.title = title;
         this.slug = slug;
         this.content = content;
+        this.preview = HTMLParser.getPreviewString(content);
     }
 
     @PrePersist
@@ -94,8 +99,13 @@ public class BlogPost {
         return content;
     }
 
+    public String getPreview() {
+        return preview;
+    }
+
     public void setContent(String content) {
         this.content = content;
+        this.preview = HTMLParser.getPreviewString(content);
     }
 
     public boolean isPublished() {
