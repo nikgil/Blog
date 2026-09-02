@@ -24,7 +24,6 @@ public class BlogPostPreviewView {
         slug = post.getSlug();
         title = post.getTitle();
 
-        // Keep persistence projections out of the template-facing model.
         orderedTags = orderedTagRows.stream()
                 .map(row -> new TagView(row.getName(), row.getSlug()))
                 .toList();
@@ -52,24 +51,5 @@ public class BlogPostPreviewView {
 
     public List<TagView> getOrderedTags() {
         return orderedTags;
-    }
-
-    public static class TagView {
-
-        private final String name;
-        private final String slug;
-
-        public TagView(String name, String slug) {
-            this.name = name;
-            this.slug = slug;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getSlug() {
-            return slug;
-        }
     }
 }

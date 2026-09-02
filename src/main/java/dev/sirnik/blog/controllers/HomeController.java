@@ -19,9 +19,9 @@ import dev.sirnik.blog.services.BlogPostPreviewService;
 @Controller
 public class HomeController {
 
-    private static final DateTimeFormatter POST_DATE_FORMATTER =
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                    .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter POST_DATE_FORMATTER = DateTimeFormatter
+            .ofLocalizedDate(FormatStyle.MEDIUM)
+            .withZone(ZoneOffset.UTC);
     private static final int PAGE_SIZE = 10;
     private final BlogPostPreviewService blogPostPreviewService;
 
@@ -37,8 +37,7 @@ public class HomeController {
     @GetMapping("/test-home")
     public String testHome(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "throttle", defaultValue = "false")
-            boolean throttle,
+            @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
             Locale locale,
             Model model) {
         if (page > 0 && throttle) {
@@ -50,8 +49,6 @@ public class HomeController {
         }
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        // The service owns the two-query preview assembly. The controller only
-        // translates the request's page number into data for the view.
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
                 .findPreviews(pageable);
 
