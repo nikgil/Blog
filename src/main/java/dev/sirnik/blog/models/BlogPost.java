@@ -1,11 +1,10 @@
 package dev.sirnik.blog.models;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+import dev.sirnik.blog.utils.HTMLParser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +19,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "blog_posts", uniqueConstraints = @UniqueConstraint(name = "uk_blog_posts_slug", columnNames = "slug"))
+@Table(
+        name = "blog_posts",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_blog_posts_slug",
+                columnNames = "slug"))
 public class BlogPost {
 
     @Id
@@ -32,6 +35,9 @@ public class BlogPost {
 
     @Column(nullable = false, unique = true)
     private String slug;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String preview;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -46,7 +52,10 @@ public class BlogPost {
     private Instant updatedAt;
 
     @ManyToMany
-    @JoinTable(name = "blog_post_tags", joinColumns = @JoinColumn(name = "blog_post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @JoinTable(
+            name = "blog_post_tags",
+            joinColumns = @JoinColumn(name = "blog_post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags = new HashSet<>();
 
     protected BlogPost() {
@@ -56,6 +65,7 @@ public class BlogPost {
         this.title = title;
         this.slug = slug;
         this.content = content;
+        this.preview = HTMLParser.getPreviewString(content);
     }
 
     @PrePersist
@@ -94,8 +104,13 @@ public class BlogPost {
         return content;
     }
 
+    public String getPreview() {
+        return preview;
+    }
+
     public void setContent(String content) {
         this.content = content;
+        this.preview = HTMLParser.getPreviewString(content);
     }
 
     public boolean isPublished() {
@@ -116,12 +131,6 @@ public class BlogPost {
 
     public Set<Tag> getTags() {
         return tags;
-    }
-
-    public List<Tag> getOrderedTags() {
-        List<Tag> orderedList = new ArrayList<>(tags);
-        orderedList.sort((t1, t2) -> t1.getName().compareTo(t2.getName()));
-        return orderedList;
     }
 
     public void addTag(Tag tag) {
