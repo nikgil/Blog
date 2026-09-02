@@ -30,7 +30,10 @@
       <div id="blogs">
         <!-- posts![] means "if posts is missing, use []"-->
         <#list posts![] as post>
-          <@preview.render post=post isLast=post?is_last&&hasNext />
+          <#-- Only the final post requests another Slice, and only when one exists. -->
+          <@preview.render
+            post=post
+            shouldLoadMore=(post?is_last && hasNext) />
         </#list>
       </div>
     </div>

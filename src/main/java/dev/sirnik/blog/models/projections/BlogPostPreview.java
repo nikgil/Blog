@@ -1,11 +1,10 @@
 package dev.sirnik.blog.models.projections;
 
 import java.time.Instant;
-import java.util.List;
-
-import dev.sirnik.blog.models.Tag;
 
 public interface BlogPostPreview {
+
+    Long getId();
 
     String getPreview();
 
@@ -14,6 +13,4 @@ public interface BlogPostPreview {
     String getSlug();
 
     String getTitle();
-
-    List<Tag> getOrderedTags();
 }

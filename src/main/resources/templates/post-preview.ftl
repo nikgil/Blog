@@ -1,5 +1,5 @@
-<#macro render post isLast>
-    <article class="post-preview" <#if isLast>
+<#macro render post shouldLoadMore>
+    <article class="post-preview" <#if shouldLoadMore>
         hx-trigger="revealed"
         hx-swap="afterend"
         hx-get="/test-home?page=${nextPage}&throttle=${throttle?c}"
@@ -26,7 +26,7 @@
             ${post.preview?html}
         </div>
 
-        <#if isLast>
+        <#if shouldLoadMore>
             <output class="post-preview__loading htmx-indicator" aria-live="polite">
                 <span class="post-preview__spinner" aria-hidden="true"></span>
                 <span class="is-sr-only">Loading more posts…</span>

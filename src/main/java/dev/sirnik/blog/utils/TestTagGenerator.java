@@ -2,11 +2,9 @@ package dev.sirnik.blog.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 import dev.sirnik.blog.models.Tag;
 import dev.sirnik.blog.repositories.TagRepository;
@@ -22,19 +20,20 @@ public class TestTagGenerator {
 
         List<String> orderedTagList = new ArrayList<>(
                 LoremIpsumGenerator.UNIQUE_WORDS);
-        Set<Tag> output = new HashSet<>();
+        List<Tag> output = new ArrayList<>();
         List<Tag> newTags = new ArrayList<>();
 
         if (size < 0 || size > orderedTagList.size()) {
             return Collections.emptyList();
         }
 
-        while (output.size() < size) {
-            String word = orderedTagList
-                    .get(randomizer.nextInt(orderedTagList.size()));
+        // Shuffle once and take unique words. Repeated random picks could build
+        // two unsaved Tag objects with the same unique slug.
+        Collections.shuffle(orderedTagList, randomizer);
+        for (String word : orderedTagList.subList(0, size)) {
             Optional<Tag> existingTag = repository.findBySlug(word);
 
-            if (!existingTag.isPresent()) {
+            if (existingTag.isEmpty()) {
                 Tag newTag = new Tag(word, word);
                 newTags.add(newTag);
                 output.add(newTag);
@@ -44,6 +43,6 @@ public class TestTagGenerator {
         }
 
         repository.saveAll(newTags);
-        return new ArrayList<>(output);
+        return output;
     }
 }

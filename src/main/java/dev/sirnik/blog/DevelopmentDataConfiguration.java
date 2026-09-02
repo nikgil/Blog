@@ -24,17 +24,22 @@ public class DevelopmentDataConfiguration {
             TagRepository tagRepository,
             BlogPostRepository blogPostRepository) {
         return arguments -> {
-            // TODO: uncomment this if I ever hit over 10 posts
-            // if (blogPostRepository.count() > 0) {
-            // return;
-            // }
+            // DevTools can restart Spring while the in-memory H2 database stays
+            // alive. Seed once so a restart cannot violate unique slugs.
+            if (blogPostRepository.count() > 0) {
+                return;
+            }
 
             List<Tag> allTags = TestTagGenerator.generateTags(tagRepository, 10,
                     -1);
 
-            TestBlogPostGenerator blogPostGenerator = new TestBlogPostGenerator.Builder()
-                    .setMinTagsPerPost(1).setMaxTagsPerPost(5)
-                    .setTagsToUse(allTags).setPostsToGenerate(10).build();
+            TestBlogPostGenerator blogPostGenerator =
+                    new TestBlogPostGenerator.Builder()
+                            .setMaxTagsPerPost(5)
+                            .setMinTagsPerPost(1)
+                            .setTagsToUse(allTags)
+                            .setPostsToGenerate(10)
+                            .build();
 
             List<BlogPost> samplePosts = new ArrayList<>();
 
@@ -42,6 +47,7 @@ public class DevelopmentDataConfiguration {
                 samplePosts.addAll(blogPostGenerator.generatePosts(i));
             }
 
+            samplePosts.forEach(post -> post.setPublished(true));
             blogPostRepository.saveAll(samplePosts);
         };
     }

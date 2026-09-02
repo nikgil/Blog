@@ -32,7 +32,7 @@ public class TestBlogPostGenerator {
                     + loremIpsumStrings[randomiser.nextInt(
                             loremIpsumStrings.length)];
             BlogPost b = new BlogPost(title,
-                    title.replace(" ", "_") + "_" + i,
+                    title.replace(" ", "_") + "_" + seed + "_" + i,
                     LoremIpsumGenerator.getParagraphs(
                             randomiser.nextInt(1, 5),
                             true));
