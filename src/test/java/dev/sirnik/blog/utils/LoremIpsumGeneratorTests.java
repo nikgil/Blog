@@ -1,9 +1,11 @@
 package dev.sirnik.blog.utils;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
+
+import dev.sirnik.blog.utils.testing.LoremIpsumGenerator;
 
 class LoremIpsumGeneratorTests {
 
@@ -24,7 +26,8 @@ class LoremIpsumGeneratorTests {
 
     @Test
     void cyclesParagraphsWhenAmountExceedsSource() {
-        String[] paragraphs = LoremIpsumGenerator.getParagraphs(7).split("\\R\\R");
+        String[] paragraphs = LoremIpsumGenerator.getParagraphs(7)
+                .split("\\R\\R");
 
         assertThat(paragraphs).hasSize(7);
         assertThat(paragraphs[5]).isEqualTo(paragraphs[0]);
