@@ -37,6 +37,11 @@ goals, not only for finishing features as quickly as possible.
   work Codex may handle autonomously. Do not turn styling into an exercise unless
   the user requests it; explain only decisions that materially affect layout,
   responsiveness, accessibility, or maintainability.
+- Treat adding or changing htmx elements and interactions as hands-on exercises
+  for the user. Explain the request, target, trigger, and swap flow; point to the
+  relevant files and primary documentation; and provide a starting hint and
+  acceptance criteria, but do not implement the htmx elements. Codex may
+  implement all other HTML and CSS directly.
 
 ## Current Stack
 
@@ -128,7 +133,9 @@ For code or template changes:
 
 1. Run `./mvnw test`.
 2. For visible UI changes, start the app and inspect the affected page at desktop
-   and narrow/mobile widths.
+   and narrow/mobile widths in both light and dark mode. Verify readable contrast
+   for text, tags, links, borders, and interactive hover and focus states; do not
+   assume a color that works in one mode will work in the other.
 3. Exercise both normal navigation and any htmx-specific request path that was
    changed.
 4. Report any pre-existing or environment-related failure separately; do not
@@ -141,5 +148,5 @@ commands or technical claims about the application.
 
 A change is complete when it follows the server-rendered architecture, keeps
 tests and rendered behavior aligned, passes the relevant Maven checks, and does
-not introduce avoidable dependencies or regressions in accessibility and mobile
-layout.
+not introduce avoidable dependencies or regressions in accessibility, mobile
+layout, or light/dark color-scheme support.

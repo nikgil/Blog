@@ -40,6 +40,7 @@ public class TestBlogPostGenerator {
 
             tags.forEach(b::addTag);
             lst.add(b);
+            b.setPublished(true);
         }
 
         return lst;
