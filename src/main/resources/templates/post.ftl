@@ -3,8 +3,9 @@
 
 <head>
     <#import "partials/head.ftl" as head>
-        <@head.render title=(post.title + " | sirnik.Dev" ) />
+        <@head.render title=(post.title + " | sirnik.Dev" ) stylesheet="post" />
         <#import "partials/header.ftl" as header>
+            <script src="/js/post.js" defer></script>
 </head>
 
 <body hx-ext="preload">

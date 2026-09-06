@@ -63,6 +63,7 @@ class TestBlogPostGeneratorTests {
                 int codeBlockCount = 0;
                 int imageCount = 0;
                 int figureCaptionCount = 0;
+                int overlayCaptionCount = 0;
                 int citationCount = 0;
 
                 for (BlogPost post : posts) {
@@ -117,6 +118,9 @@ class TestBlogPostGeneratorTests {
 
                         figureCaptionCount += document
                                         .select("figure > figcaption").size();
+                        overlayCaptionCount += document.select(
+                                        "figure > figcaption > .generated-test-image__caption")
+                                        .size();
                         citationCount += document
                                         .select("figure > figcaption > cite")
                                         .size();
@@ -127,6 +131,7 @@ class TestBlogPostGeneratorTests {
                 assertThat(codeBlockCount).isPositive();
                 assertThat(imageCount).isPositive();
                 assertThat(figureCaptionCount).isBetween(1, imageCount - 1);
+                assertThat(overlayCaptionCount).isBetween(1, imageCount - 1);
                 assertThat(citationCount).isBetween(1, imageCount - 1);
         }
 

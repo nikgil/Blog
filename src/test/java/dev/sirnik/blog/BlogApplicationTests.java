@@ -70,7 +70,10 @@ class BlogApplicationTests {
                                                 .name("index"))
                                 .andExpect(MockMvcResultMatchers.content()
                                                 .string(containsString(
-                                                                "sirnik.Dev")));
+                                                                "sirnik.Dev")))
+                                .andExpect(MockMvcResultMatchers.content()
+                                                .string(containsString(
+                                                                "href=\"/css/index.css\"")));
         }
 
         @Test
@@ -93,7 +96,10 @@ class BlogApplicationTests {
                                                                 containsString("href=\"/\"")))
                                 .andExpect(MockMvcResultMatchers.content()
                                                 .string(
-                                                                containsString("Back to all posts")));
+                                                                containsString("Back to all posts")))
+                                .andExpect(MockMvcResultMatchers.content()
+                                                .string(containsString(
+                                                                "href=\"/css/error.css\"")));
         }
 
         @Test
@@ -116,7 +122,10 @@ class BlogApplicationTests {
                                                                 containsString("href=\"/\"")))
                                 .andExpect(MockMvcResultMatchers.content()
                                                 .string(
-                                                                containsString("Back to all posts")));
+                                                                containsString("Back to all posts")))
+                                .andExpect(MockMvcResultMatchers.content()
+                                                .string(containsString(
+                                                                "href=\"/css/error.css\"")));
         }
 
         @Test
@@ -162,6 +171,9 @@ class BlogApplicationTests {
                                                 .string(containsString("Current post")))
                                 .andExpect(MockMvcResultMatchers.content()
                                                 .string(containsString("Java")))
+                                .andExpect(MockMvcResultMatchers.content()
+                                                .string(containsString(
+                                                                "href=\"/css/post.css\"")))
                                 .andExpect(MockMvcResultMatchers.content()
                                                 .string(containsString(
                                                                 "href=\"/posts/"
@@ -254,7 +266,9 @@ class BlogApplicationTests {
                                 .contains("href=\"/\"")
                                 .contains("Home")
                                 .contains("href=\"/posts/newer-post\"")
-                                .contains("preload=\"mouseover\"");
+                                .contains("preload=\"mouseover\"")
+                                .contains("href=\"/css/post.css\"")
+                                .contains("src=\"/js/post.js\"");
         }
 
         @Test

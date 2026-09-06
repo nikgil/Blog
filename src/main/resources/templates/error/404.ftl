@@ -3,7 +3,7 @@
 
 <head>
   <#import "../partials/head.ftl" as head>
-  <@head.render title="Page not found | sirnik.Dev" />
+  <@head.render title="Page not found | sirnik.Dev" stylesheet="error" />
   <#import "../partials/header.ftl" as header>
   <#import "../partials/error-card.ftl" as errorCard>
 </head>
