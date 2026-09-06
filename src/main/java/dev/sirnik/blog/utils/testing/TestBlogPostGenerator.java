@@ -115,10 +115,15 @@ public class TestBlogPostGenerator {
         if (!beforeLink.isEmpty()) {
             paragraph.appendText(beforeLink + " ");
         }
-        paragraph.appendElement("a")
+        Element linkedElement = paragraph.appendElement("a")
                 .attr("href", linkTarget)
-                .attr("preload", !linkText.equals(EXTERNAL_LINK))
                 .text(linkText);
+
+        if (!linkText.equals(EXTERNAL_LINK)) {
+            linkedElement
+                    .attr("preload", true)
+                    .attr("preload-images", "true");
+        }
 
         if (!afterLink.isEmpty()) {
             paragraph.appendText(" " + afterLink);
