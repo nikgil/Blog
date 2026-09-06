@@ -1,4 +1,4 @@
-package dev.sirnik.blog.utils;
+package dev.sirnik.blog.utils.testing;
 
 import java.util.ArrayList;
 import java.util.Collections;

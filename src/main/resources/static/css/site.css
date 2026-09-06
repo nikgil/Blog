@@ -211,15 +211,28 @@
 
 @media screen and (max-width: 768px) {
     .post-navigation {
-        grid-template-columns: minmax(0, 1fr);
+        gap: 0.5rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .post-navigation__link--newer {
-        grid-column: 1;
+        grid-column: 3;
     }
 
     .post-navigation__link--home {
-        grid-column: 1;
+        grid-column: 2;
+    }
+
+    .post-navigation__link {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .post-navigation__label {
+        font-size: 0.625rem;
+    }
+
+    .post-navigation__title {
+        font-size: 0.875rem;
     }
 }
 
