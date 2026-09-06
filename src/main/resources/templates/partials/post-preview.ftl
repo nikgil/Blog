@@ -1,12 +1,12 @@
 <#macro render post shouldLoadMore>
-    <article class="post-preview" <#if shouldLoadMore>
+    <article class="post-preview" hx-ext="preload" <#if shouldLoadMore>
         hx-trigger="revealed"
         hx-swap="afterend"
         hx-get="/test-home?page=${nextPage}&throttle=${throttle?c}"
         hx-select="#blogs > .post-preview"
         </#if>
         >
-        <a class="post-preview__link" href="/posts/${post.slug}">
+        <a class="post-preview__link" href="/posts/${post.slug}" preload>
             <header class="mb-4">
                 <h2 class="title is-4 mb-3">${post.title}</h2>
                 <time class="post-preview__date" datetime="${post.createdAt}">

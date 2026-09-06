@@ -37,6 +37,11 @@ goals, not only for finishing features as quickly as possible.
   work Codex may handle autonomously. Do not turn styling into an exercise unless
   the user requests it; explain only decisions that materially affect layout,
   responsiveness, accessibility, or maintainability.
+- Treat adding or changing htmx elements and interactions as hands-on exercises
+  for the user. Explain the request, target, trigger, and swap flow; point to the
+  relevant files and primary documentation; and provide a starting hint and
+  acceptance criteria, but do not implement the htmx elements. Codex may
+  implement all other HTML and CSS directly.
 
 ## Current Stack
 

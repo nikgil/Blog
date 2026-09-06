@@ -3,8 +3,8 @@
 
 <head>
     <#import "partials/head.ftl" as head>
-    <@head.render title=(post.title + " | sirnik.Dev") />
-    <#import "partials/header.ftl" as header>
+        <@head.render title=(post.title + " | sirnik.Dev" ) />
+        <#import "partials/header.ftl" as header>
 </head>
 
 <body hx-ext="preload">
@@ -24,7 +24,7 @@
                                     ${postDateFormatter.format(post.createdAt)}
                                 </time>
                             </span>
-                            <#if post.updatedAt?string != post.createdAt?string>
+                            <#if post.updatedAt?string !=post.createdAt?string>
                                 <span aria-hidden="true">·</span>
                                 <span>
                                     Updated
@@ -46,31 +46,32 @@
 
                     <div class="post__body content">
                         <#-- Post content is trusted author HTML stored by the application. -->
-                        ${post.content}
+                            ${post.content}
                     </div>
                 </article>
 
-                <#if olderPost?? || newerPost??>
-                    <nav class="post-navigation" aria-label="Adjacent posts">
-                        <#if olderPost??>
-                            <a class="post-navigation__link post-navigation__link--older"
-                                href="/posts/${olderPost.slug}"
-                                preload="mouseover">
-                                <span class="post-navigation__label">← Previous post</span>
-                                <span class="post-navigation__title">${olderPost.title}</span>
-                            </a>
-                        </#if>
+                <nav class="post-navigation" aria-label="Post navigation">
+                    <#if olderPost??>
+                        <a class="post-navigation__link post-navigation__link--older" href="/posts/${olderPost.slug}"
+                            preload="mouseover">
+                            <span class="post-navigation__label">← Previous post</span>
+                            <span class="post-navigation__title">${olderPost.title}</span>
+                        </a>
+                    </#if>
 
-                        <#if newerPost??>
-                            <a class="post-navigation__link post-navigation__link--newer"
-                                href="/posts/${newerPost.slug}"
-                                preload="mouseover">
-                                <span class="post-navigation__label">Next post →</span>
-                                <span class="post-navigation__title">${newerPost.title}</span>
-                            </a>
-                        </#if>
-                    </nav>
-                </#if>
+                    <a class="post-navigation__link post-navigation__link--home" href="/">
+                        <span class="post-navigation__label">All posts</span>
+                        <span class="post-navigation__title">Home</span>
+                    </a>
+
+                    <#if newerPost??>
+                        <a class="post-navigation__link post-navigation__link--newer" href="/posts/${newerPost.slug}"
+                            preload="mouseover">
+                            <span class="post-navigation__label">Next post →</span>
+                            <span class="post-navigation__title">${newerPost.title}</span>
+                        </a>
+                    </#if>
+                </nav>
             </main>
         </div>
     </section>
