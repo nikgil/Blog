@@ -117,7 +117,9 @@ public class TestBlogPostGenerator {
         }
         paragraph.appendElement("a")
                 .attr("href", linkTarget)
+                .attr("preload", !linkText.equals(EXTERNAL_LINK))
                 .text(linkText);
+
         if (!afterLink.isEmpty()) {
             paragraph.appendText(" " + afterLink);
         }

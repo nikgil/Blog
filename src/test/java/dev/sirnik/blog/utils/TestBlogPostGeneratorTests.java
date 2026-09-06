@@ -60,60 +60,74 @@ class TestBlogPostGeneratorTests {
                                 .collect(Collectors.toSet());
                 int externalLinkCount = 0;
                 int internalLinkCount = 0;
+                int codeBlockCount = 0;
+                int imageCount = 0;
                 int figureCaptionCount = 0;
                 int citationCount = 0;
 
                 for (BlogPost post : posts) {
                         Document document = Jsoup
                                         .parseBodyFragment(post.getContent());
-                        Element link = document.selectFirst("p a[href]");
-                        Element code = document.selectFirst(
-                                        "pre > code.language-java");
-                        Element image = document.selectFirst("figure > img");
 
-                        assertThat(link).isNotNull();
-                        assertThat(link.text()).isNotBlank();
-                        assertThat(LoremIpsumGenerator.getParagraphs(4))
-                                        .contains(link.text());
-                        assertThat(code).isNotNull();
-                        assertThat(code.text()).isNotBlank();
-                        assertThat(image).isNotNull();
-                        assertThat(image.attr("srcset"))
-                                        .contains("480w", "960w", "1440w");
-                        assertThat(image.attr("sizes"))
-                                        .contains("max-width: 768px");
-                        assertThat(image.attr("loading")).isEqualTo("lazy");
-                        assertThat(image.attr("decoding")).isEqualTo("async");
-                        assertThat(image.attr("width")).isEqualTo("960");
-                        assertThat(image.attr("height")).isEqualTo("540");
+                        assertThat(document.select("pre + pre")).isEmpty();
 
-                        String target = link.attr("href");
-                        if (target.equals(EXTERNAL_LINK)) {
-                                externalLinkCount++;
-                        } else {
-                                internalLinkCount++;
-                                assertThat(target).startsWith("/posts/");
-                                String targetSlug = target
-                                                .substring("/posts/".length());
-                                assertThat(knownSlugs).contains(targetSlug);
-                                assertThat(targetSlug)
-                                                .isNotEqualTo(post.getSlug());
+                        for (Element link : document.select("p a[href]")) {
+                                assertThat(link.text()).isNotBlank();
+                                assertThat(LoremIpsumGenerator.getParagraphs(4))
+                                                .contains(link.text());
+
+                                String target = link.attr("href");
+                                if (target.equals(EXTERNAL_LINK)) {
+                                        externalLinkCount++;
+                                } else {
+                                        internalLinkCount++;
+                                        assertThat(target).startsWith("/posts/");
+                                        String targetSlug = target.substring(
+                                                        "/posts/".length());
+                                        assertThat(knownSlugs)
+                                                        .contains(targetSlug);
+                                        assertThat(targetSlug)
+                                                        .isNotEqualTo(
+                                                                        post.getSlug());
+                                }
                         }
 
-                        if (document.selectFirst(
-                                        "figure > figcaption") != null) {
-                                figureCaptionCount++;
+                        for (Element code : document.select(
+                                        "pre > code.language-java")) {
+                                assertThat(code.text()).isNotBlank();
+                                codeBlockCount++;
                         }
-                        if (document.selectFirst(
-                                        "figure > figcaption > cite") != null) {
-                                citationCount++;
+
+                        for (Element image : document.select("figure > img")) {
+                                assertThat(image.attr("srcset"))
+                                                .contains("480w", "960w",
+                                                                "1440w");
+                                assertThat(image.attr("sizes"))
+                                                .contains("max-width: 768px");
+                                assertThat(image.attr("loading"))
+                                                .isEqualTo("lazy");
+                                assertThat(image.attr("decoding"))
+                                                .isEqualTo("async");
+                                assertThat(image.attr("width"))
+                                                .isEqualTo("960");
+                                assertThat(image.attr("height"))
+                                                .isEqualTo("540");
+                                imageCount++;
                         }
+
+                        figureCaptionCount += document
+                                        .select("figure > figcaption").size();
+                        citationCount += document
+                                        .select("figure > figcaption > cite")
+                                        .size();
                 }
 
                 assertThat(externalLinkCount).isPositive();
                 assertThat(internalLinkCount).isPositive();
-                assertThat(figureCaptionCount).isBetween(1, posts.size() - 1);
-                assertThat(citationCount).isBetween(1, posts.size() - 1);
+                assertThat(codeBlockCount).isPositive();
+                assertThat(imageCount).isPositive();
+                assertThat(figureCaptionCount).isBetween(1, imageCount - 1);
+                assertThat(citationCount).isBetween(1, imageCount - 1);
         }
 
         private TestBlogPostGenerator generatorFor(Path imageDirectory,

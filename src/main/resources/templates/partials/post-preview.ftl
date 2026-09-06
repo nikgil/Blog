@@ -6,7 +6,7 @@
         hx-select="#blogs > .post-preview"
         </#if>
         >
-        <a class="post-preview__link" href="/posts/${post.slug}" preload>
+        <a class="post-preview__link" href="/posts/${post.slug}" preload-images="true" preload>
             <header class="mb-4">
                 <h2 class="title is-4 mb-3">${post.title}</h2>
                 <time class="post-preview__date" datetime="${post.createdAt}">

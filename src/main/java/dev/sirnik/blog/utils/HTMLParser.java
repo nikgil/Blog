@@ -50,17 +50,14 @@ public class HTMLParser {
             String elementTag) {
         Element previousElement = position == 0 ? null
                 : parent.child(position - 1);
-        Element nextElement = position >= parent.childrenSize() - 1 ? null
-                : parent.child(position + 1);
+        Element nextElement = position == parent.childrenSize() ? null
+                : parent.child(position);
 
-        if (previousElement != null && previousElement.is(elementTag)) {
-            return true;
-        }
+        boolean previousMatches = previousElement != null
+                && previousElement.tagName().equals(elementTag);
+        boolean nextMatches = nextElement != null
+                && nextElement.tagName().equals(elementTag);
 
-        if (nextElement != null && nextElement.is(elementTag)) {
-            return true;
-        }
-
-        return false;
+        return previousMatches || nextMatches;
     }
 }
