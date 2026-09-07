@@ -13,6 +13,26 @@ goals, not only for finishing features as quickly as possible.
 
 ## Learning and Collaboration
 
+### Default editing boundary
+
+- Unless the user explicitly overrides this direction for the current task,
+  Codex may modify only CSS, HTML/FreeMarker markup, and Java tests under
+  `src/test/java/`.
+- Do not modify production Java, JavaScript, database migrations, application
+  configuration, build configuration, or test-data generators unless the user
+  explicitly authorizes that category of change. In particular,
+  `src/main/java/dev/sirnik/blog/utils/testing/` contains production-side
+  development-data generators and is outside the default editing boundary.
+- A feature request by itself is not permission to cross this boundary. If the
+  requested behavior requires an out-of-scope change, inspect and explain the
+  relevant code without editing it. Give the user a concrete implementation
+  outline, focused hints or pseudocode, acceptance criteria, and links or exact
+  search terms for official primary documentation. Offer to review the user's
+  implementation afterward.
+- Cross the boundary only when the user clearly asks Codex to implement the
+  otherwise out-of-scope portion. Keep that exception limited to the files and
+  behavior they authorized.
+
 - Explain both what is being changed and why, especially for Spring request
   flow, dependency injection, MVC boundaries, persistence and transactions,
   testing, and htmx request/target/swap behavior. Keep explanations tied to the
@@ -30,9 +50,11 @@ goals, not only for finishing features as quickly as possible.
   favoring official Spring, htmx, FreeMarker, Java, or other primary
   documentation over generic tutorials. Do not simply tell the user to search;
   provide enough vocabulary for them to recognize the relevant documentation.
-- Implement directly when the user asks you to after that handoff, when they are
-  blocked, or when the work is mostly repetitive plumbing rather than a useful
-  learning exercise. Never withhold context needed for them to make progress.
+- Within the default editing boundary, implement directly when the user asks
+  after that handoff, when they are blocked, or when the work is mostly
+  repetitive plumbing rather than a useful learning exercise. Outside that
+  boundary, require the explicit override described above. Never withhold
+  context needed for them to make progress.
 - Treat CSS, visual styling, and routine Bulma composition as implementation
   work Codex may handle autonomously. Do not turn styling into an exercise unless
   the user requests it; explain only decisions that materially affect layout,
