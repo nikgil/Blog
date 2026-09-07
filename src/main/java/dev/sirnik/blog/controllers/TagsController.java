@@ -24,11 +24,16 @@ public class TagsController {
     @GetMapping("/tags")
     public String getTags(
         @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "query", defaultValue = "") String filterQuery,
         Model model) {
         page = Math.max(0, page);
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Slice<Tag> tags = tagRepo.findAllByOrderByName(pageable);
+        Slice<Tag> tags = filterQuery.isBlank()
+            ? tagRepo.findAllByOrderByName(pageable)
+            : tagRepo
+                .findByNameStartingWithIgnoreCaseOrderByNameAsc(filterQuery,
+                    pageable);
 
         model.addAttribute("tags", tags.getContent());
         model.addAttribute("hasNextTagPage", tags.hasNext());

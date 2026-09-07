@@ -48,7 +48,9 @@
               <label class="is-sr-only" for="tag-filter-query">Search tags</label>
               <div class="control">
                 <input id="tag-filter-query" class="input is-small tag-filter__input" type="search" name="query"
-                  placeholder="Search tags" autocomplete="off" aria-controls="tag-list">
+                  placeholder="Search tags" autocomplete="off" aria-controls="tag-list"
+                  hx-trigger="input changed delay:500ms, keyup[key=='Enter']" hx-target="#tag-filter-results"
+                  hx-swap="innerHTML" hx-get="/tags">
               </div>
             </div>
             <div id="tag-filter-results" class="tag-filter__results" aria-live="polite" hx-swap="innerHTML"

@@ -32,4 +32,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         @Param("postIds") Collection<Long> postIds);
 
     Slice<Tag> findAllByOrderByName(Pageable pageable);
+
+    Slice<Tag> findByNameStartingWithIgnoreCaseOrderByNameAsc(
+        String prefix,
+        Pageable pageable);
 }
