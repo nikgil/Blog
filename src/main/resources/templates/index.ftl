@@ -41,6 +41,22 @@
               </#list>
             </ol>
           </nav>
+
+          <section class="tag-filter" aria-labelledby="tag-filter-title">
+            <h2 id="tag-filter-title" class="tag-filter__title">Tags</h2>
+            <div class="field mb-0">
+              <label class="is-sr-only" for="tag-filter-query">Search tags</label>
+              <div class="control">
+                <input id="tag-filter-query" class="input is-small tag-filter__input" type="search" name="query"
+                  placeholder="Search tags" autocomplete="off" aria-controls="tag-list">
+              </div>
+            </div>
+            <div id="tag-filter-results" class="tag-filter__results" aria-live="polite" hx-swap="innerHTML"
+              hx-get="/tags" hx-trigger="load">
+              <#assign tagsLoading=true>
+                <#include "partials/tag-list.ftl">
+            </div>
+          </section>
         </aside>
 
         <main id="blogs">

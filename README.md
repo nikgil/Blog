@@ -191,4 +191,3 @@ Back up PostgreSQL before deployments that introduce new Flyway migrations.
 - [ ] Menu bar to the right of the header
 - [ ] Make search work
 - [ ] Make tag search work
-- [ ] Add a left-hand bar with months and years

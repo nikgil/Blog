@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
+import dev.sirnik.blog.models.views.TagView;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 import freemarker.template.Configuration;
@@ -75,7 +76,44 @@ class BlogApplicationTests {
                 .string(containsString("aria-label=\"Post archive\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("id=\"archive-years\"")));
+                .string(containsString("id=\"archive-years\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-filter-query\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-filter-results\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("Loading tags…")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-page-previous\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-page-next\"")));
+    }
+
+    @Test
+    void tagListPartialRendersAtMostTwentyTags() throws Exception {
+        List<TagView> tags = new ArrayList<>();
+        for (int i = 0; i < 21; i++) {
+            tags.add(new TagView("Tag " + i, "tag-" + i));
+        }
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/tag-list.ftl")
+            .process(Map.of("tags", tags, "tagPage", 0, "hasNextTagPage", true),
+                rendered);
+
+        assertThat(rendered.toString())
+            .contains("id=\"tag-list\"")
+            .contains("href=\"?tag=tag-0\"")
+            .contains("Tag 19")
+            .doesNotContain("Tag 20")
+            .contains("href=\"/tags?page=1\"")
+            .contains("aria-label=\"Tag page 1\"");
     }
 
     @Test
