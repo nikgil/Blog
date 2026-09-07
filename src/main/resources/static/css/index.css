@@ -87,10 +87,6 @@
     color: var(--bulma-link-text, var(--bulma-link, #485fc7));
 }
 
-#blogs>.post-preview[id] {
-    scroll-margin-block-start: 1.5rem;
-}
-
 @media screen and (min-width: 769px) {
     .archive-layout:has(.archive-nav__years:not(:empty)) {
         display: grid;
@@ -156,15 +152,6 @@
         min-width: auto;
     }
 
-    #blogs>.post-preview[id] {
-        scroll-margin-block-start: 4.5rem;
-    }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-    html {
-        scroll-behavior: smooth;
-    }
 }
 
 /* Post preview cards */
