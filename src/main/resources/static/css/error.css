@@ -1,0 +1,33 @@
+/* Full-height error page layout */
+.error-page {
+    min-height: 100vh;
+}
+
+.error-page__main {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: clamp(24rem, 65vh, 42rem);
+    padding-block: 2rem;
+}
+
+/* Shared 404 and generic error card */
+.error-page__card.box {
+    background: linear-gradient(145deg,
+            var(--bulma-scheme-main-bis, #fafafa),
+            var(--bulma-scheme-main, #ffffff));
+    border: 1px solid var(--bulma-border-weak, #dbdbdb);
+    max-width: 40rem;
+    padding: clamp(2rem, 7vw, 4rem);
+    text-align: center;
+    width: 100%;
+}
+
+.error-page__code {
+    color: var(--bulma-text-weak, #7a7a7a);
+    font-size: clamp(4rem, 16vw, 8rem);
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    line-height: 0.8;
+    margin-bottom: 2rem;
+}

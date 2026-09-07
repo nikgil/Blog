@@ -3,7 +3,7 @@
 
 <head>
   <#import "partials/head.ftl" as head>
-    <@head.render title="sirnik.Dev" />
+    <@head.render title="sirnik.Dev" stylesheet="index" />
     <#import "partials/post-preview.ftl" as preview>
       <#import "partials/header.ftl" as header>
 </head>

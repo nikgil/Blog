@@ -1,0 +1,93 @@
+/* Post preview cards */
+.post-preview + .post-preview {
+    border-top: 1px solid var(--bulma-border-weak, #dbdbdb);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+.post-preview__link {
+    border-radius: 0.375rem;
+    color: inherit;
+    display: block;
+    margin: -0.75rem;
+    padding: 0.75rem;
+}
+
+.post-preview__link:hover,
+.post-preview__link:focus-visible {
+    background-color: var(--bulma-scheme-main-bis, #fafafa);
+    color: inherit;
+}
+
+.post-preview__link:focus-visible {
+    outline: 2px solid var(--bulma-focus, #485fc7);
+    outline-offset: 2px;
+}
+
+.post-preview__date {
+    color: var(--bulma-text-weak, #7a7a7a);
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+}
+
+.post-preview__tag-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+}
+
+.post-preview__tags.tags {
+    flex-wrap: nowrap;
+    margin-bottom: 0;
+    min-width: max-content;
+}
+
+.post-preview__tags .tag {
+    background-color: var(--bulma-scheme-main-ter, #f5f5f5);
+    color: var(--bulma-text-strong, #363636);
+    flex: 0 0 auto;
+}
+
+.post-preview__body {
+    overflow-wrap: anywhere;
+}
+
+/* Infinite-scroll loading indicator */
+.post-preview__loading {
+    align-items: center;
+    display: none;
+    justify-content: center;
+    margin-top: 1.5rem;
+    opacity: 0;
+}
+
+.post-preview.htmx-request .post-preview__loading {
+    display: flex;
+    opacity: 1;
+}
+
+.post-preview__spinner {
+    animation: post-preview-spin 0.75s linear infinite;
+    border: 0.2rem solid var(--bulma-border-weak, #dbdbdb);
+    border-radius: 50%;
+    border-top-color: var(--bulma-link, #485fc7);
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+@keyframes post-preview-spin {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+/* Respect visitors who prefer less animation. */
+@media (prefers-reduced-motion: reduce) {
+    .post-preview__spinner {
+        animation-duration: 1.5s;
+    }
+}

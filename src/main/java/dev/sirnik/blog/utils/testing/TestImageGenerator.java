@@ -106,11 +106,10 @@ public final class TestImageGenerator {
         if (includeCaption || includeCitation) {
             Element caption = figure.appendElement("figcaption");
             if (includeCaption) {
-                caption.appendText("Generated sample image for “"
-                        + post.getTitle() + "”.");
-            }
-            if (includeCaption && includeCitation) {
-                caption.appendText(" ");
+                caption.appendElement("span")
+                        .addClass("generated-test-image__caption")
+                        .text("Generated sample image for “"
+                                + post.getTitle() + "”.");
             }
             if (includeCitation) {
                 caption.appendElement("cite")

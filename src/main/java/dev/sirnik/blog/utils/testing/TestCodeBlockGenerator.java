@@ -36,6 +36,7 @@ public class TestCodeBlockGenerator {
 
         pre.appendElement("code")
                 .addClass("language-java")
+                .attr("data-lang", "java")
                 .text(generateCodeBlock(randomiser));
 
         return HTMLParser.insertAtRandomPosition(document.body(), pre,
