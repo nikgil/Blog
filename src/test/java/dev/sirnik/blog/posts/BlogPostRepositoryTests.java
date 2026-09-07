@@ -26,11 +26,8 @@ class BlogPostRepositoryTests {
     private final EntityManager entityManager;
 
     @Autowired
-    BlogPostRepositoryTests(
-            BlogPostRepository blogPostRepository,
-            TagRepository tagRepository,
-            EntityManager entityManager
-    ) {
+    BlogPostRepositoryTests(BlogPostRepository blogPostRepository,
+        TagRepository tagRepository, EntityManager entityManager) {
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
         this.entityManager = entityManager;
@@ -39,11 +36,8 @@ class BlogPostRepositoryTests {
     @Test
     void savesAndFindsPostBySlug() {
         Tag spring = tagRepository.save(new Tag("Spring", "spring"));
-        BlogPost post = new BlogPost(
-                "Setting up the blog",
-                "setting-up-the-blog",
-                "The first persisted post."
-        );
+        BlogPost post = new BlogPost("Setting up the blog",
+            "setting-up-the-blog", "The first persisted post.");
         post.addTag(spring);
         post.setPublished(true);
 
@@ -52,18 +46,19 @@ class BlogPostRepositoryTests {
         entityManager.clear();
 
         BlogPost reloadedPost = blogPostRepository
-                .findBySlugAndPublishedTrue("setting-up-the-blog")
-                .orElseThrow();
+            .findBySlugAndPublishedTrue("setting-up-the-blog")
+            .orElseThrow();
 
         assertThat(postId).isNotNull();
         assertThat(reloadedPost.getId()).isEqualTo(postId);
         assertThat(reloadedPost.getCreatedAt()).isNotNull();
         assertThat(reloadedPost.getUpdatedAt()).isNotNull();
-        assertThat(Persistence.getPersistenceUtil()
-                .isLoaded(reloadedPost, "tags")).isTrue();
+        assertThat(
+            Persistence.getPersistenceUtil().isLoaded(reloadedPost, "tags"))
+            .isTrue();
         assertThat(reloadedPost.getTags())
-                .extracting(Tag::getSlug)
-                .containsExactly("spring");
+            .extracting(Tag::getSlug)
+            .containsExactly("spring");
     }
 
     @Test
@@ -75,46 +70,47 @@ class BlogPostRepositoryTests {
         BlogPost newest = savePost("Newest", "newest", true);
         blogPostRepository.flush();
 
-        BlogPostLink older = blogPostRepository.findOlderPublished(
-                current.getCreatedAt(), current.getId());
-        BlogPostLink newer = blogPostRepository.findNewerPublished(
-                current.getCreatedAt(), current.getId());
+        BlogPostLink older = blogPostRepository
+            .findOlderPublished(current.getCreatedAt(), current.getId());
+        BlogPostLink newer = blogPostRepository
+            .findNewerPublished(current.getCreatedAt(), current.getId());
 
         assertThat(older).isNotNull();
         assertThat(older.getSlug()).isEqualTo(oldest.getSlug());
         assertThat(newer).isNotNull();
         assertThat(newer.getSlug()).isEqualTo(newest.getSlug());
 
-        assertThat(blogPostRepository.findOlderPublished(
-                oldest.getCreatedAt(), oldest.getId())).isNull();
-        assertThat(blogPostRepository.findNewerPublished(
-                newest.getCreatedAt(), newest.getId())).isNull();
+        assertThat(blogPostRepository
+            .findOlderPublished(oldest.getCreatedAt(), oldest.getId()))
+            .isNull();
+        assertThat(blogPostRepository
+            .findNewerPublished(newest.getCreatedAt(), newest.getId()))
+            .isNull();
     }
 
     @Test
     void savesManyToManyTags() {
         Tag java = tagRepository.save(new Tag("Java", "java"));
         Tag spring = tagRepository.save(new Tag("Spring", "spring"));
-        BlogPost post = new BlogPost(
-                "Spring persistence",
-                "spring-persistence",
-                "Using JPA with Flyway."
-        );
+        BlogPost post = new BlogPost("Spring persistence", "spring-persistence",
+            "Using JPA with Flyway.");
         post.addTag(java);
         post.addTag(spring);
 
         Long postId = blogPostRepository.saveAndFlush(post).getId();
         entityManager.clear();
 
-        BlogPost reloadedPost = blogPostRepository.findById(postId).orElseThrow();
+        BlogPost reloadedPost = blogPostRepository
+            .findById(postId)
+            .orElseThrow();
         Tag reloadedJava = tagRepository.findBySlug("java").orElseThrow();
 
         assertThat(reloadedPost.getTags())
-                .extracting(Tag::getSlug)
-                .containsExactlyInAnyOrder("java", "spring");
+            .extracting(Tag::getSlug)
+            .containsExactlyInAnyOrder("java", "spring");
         assertThat(reloadedJava.getBlogPosts())
-                .extracting(BlogPost::getId)
-                .contains(postId);
+            .extracting(BlogPost::getId)
+            .contains(postId);
     }
 
     private BlogPost savePost(String title, String slug, boolean published) {

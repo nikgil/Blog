@@ -1,6 +1,10 @@
 package dev.sirnik.blog;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.boot.ApplicationRunner;
@@ -22,60 +26,64 @@ import dev.sirnik.blog.utils.testing.TestTagGenerator;
 @Profile("!prod & !test")
 public class DevelopmentDataConfiguration implements WebMvcConfigurer {
 
-        private static final int TEST_DATA_SEED = 20_260_906;
-        private static final Path GENERATED_IMAGE_DIRECTORY = Path.of(
-                        "target", "generated-test-images").toAbsolutePath()
-                        .normalize();
-        private static final String GENERATED_IMAGE_PATH = "/generated-test-images/";
+    private static final int TEST_DATA_SEED = 20_260_906;
+    private static final Path GENERATED_IMAGE_DIRECTORY = Path
+        .of("target", "generated-test-images")
+        .toAbsolutePath()
+        .normalize();
+    private static final String GENERATED_IMAGE_PATH = "/generated-test-images/";
 
-        @Override
-        public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                String resourceLocation = GENERATED_IMAGE_DIRECTORY.toUri()
-                                .toString();
-                if (!resourceLocation.endsWith("/")) {
-                        resourceLocation += "/";
-                }
-
-                registry.addResourceHandler(GENERATED_IMAGE_PATH + "**")
-                                .addResourceLocations(resourceLocation);
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String resourceLocation = GENERATED_IMAGE_DIRECTORY.toUri().toString();
+        if (!resourceLocation.endsWith("/")) {
+            resourceLocation += "/";
         }
 
-        @Bean
-        TestImageGenerator testImageGenerator() {
-                return new TestImageGenerator(
-                                GENERATED_IMAGE_DIRECTORY,
-                                GENERATED_IMAGE_PATH);
-        }
+        registry
+            .addResourceHandler(GENERATED_IMAGE_PATH + "**")
+            .addResourceLocations(resourceLocation);
+    }
 
-        @Bean
-        ApplicationRunner seedBlogPosts(
-                        TagRepository tagRepository,
-                        BlogPostRepository blogPostRepository,
-                        TestImageGenerator imageGenerator) {
-                return arguments -> {
-                        // DevTools can restart Spring while the in-memory H2
-                        // database stays
-                        // alive. Seed once so a restart cannot violate unique
-                        // slugs.
-                        if (blogPostRepository.count() > 0) {
-                                return;
-                        }
+    @Bean
+    TestImageGenerator testImageGenerator() {
+        return new TestImageGenerator(GENERATED_IMAGE_DIRECTORY,
+            GENERATED_IMAGE_PATH);
+    }
 
-                        List<Tag> allTags = TestTagGenerator.generateTags(
-                                        tagRepository, 10, TEST_DATA_SEED);
+    @Bean
+    ApplicationRunner seedBlogPosts(TagRepository tagRepository,
+        BlogPostRepository blogPostRepository,
+        TestImageGenerator imageGenerator) {
+        return arguments -> {
+            // DevTools can restart Spring while the in-memory H2
+            // database stays
+            // alive. Seed once so a restart cannot violate unique
+            // slugs.
+            if (blogPostRepository.count() > 0) {
+                return;
+            }
 
-                        TestBlogPostGenerator blogPostGenerator = new TestBlogPostGenerator.Builder()
-                                        .setMaxTagsPerPost(5)
-                                        .setMinTagsPerPost(1)
-                                        .setTagsToUse(allTags)
-                                        .setPostsToGenerate(50)
-                                        .setImageGenerator(imageGenerator)
-                                        .build();
+            List<Tag> allTags = TestTagGenerator
+                .generateTags(tagRepository, 10, TEST_DATA_SEED);
 
-                        List<BlogPost> samplePosts = blogPostGenerator
-                                        .generatePosts(TEST_DATA_SEED);
-                        blogPostRepository.saveAll(samplePosts);
-                };
-        }
+            TestBlogPostGenerator blogPostGenerator = new TestBlogPostGenerator.Builder()
+                .setMaxTagsPerPost(5)
+                .setMinTagsPerPost(1)
+                .setTagsToUse(allTags)
+                .setPostsToGenerate(50)
+                .setImageGenerator(imageGenerator)
+                .setMinimumTime(ZonedDateTime
+                    .now(ZoneOffset.UTC)
+                    .minus(Period.ofYears(2))
+                    .toInstant())
+                .setMaximumTime(Instant.now())
+                .build();
+
+            List<BlogPost> samplePosts = blogPostGenerator
+                .generatePosts(TEST_DATA_SEED);
+            blogPostRepository.saveAll(samplePosts);
+        };
+    }
 
 }

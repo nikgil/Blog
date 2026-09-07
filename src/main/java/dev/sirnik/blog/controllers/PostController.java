@@ -24,45 +24,47 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/posts")
 public class PostController {
 
-        private static final DateTimeFormatter POST_DATE_FORMATTER = DateTimeFormatter
-                        .ofLocalizedDate(FormatStyle.MEDIUM)
-                        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter POST_DATE_FORMATTER = DateTimeFormatter
+        .ofLocalizedDate(FormatStyle.MEDIUM)
+        .withZone(ZoneOffset.UTC);
 
-        private final BlogPostRepository postRepository;
+    private final BlogPostRepository postRepository;
 
-        public PostController(BlogPostRepository postRepository) {
-                this.postRepository = postRepository;
+    public PostController(BlogPostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
+
+    @GetMapping("/{slug}")
+    public String individualPost(@PathVariable String slug, Locale locale,
+        Model model, HttpServletResponse response) {
+        Optional<BlogPost> post = postRepository
+            .findBySlugAndPublishedTrue(slug);
+        if (post.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "error/404";
         }
 
-        @GetMapping("/{slug}")
-        public String individualPost(@PathVariable String slug, Locale locale,
-                        Model model, HttpServletResponse response) {
-                Optional<BlogPost> post = postRepository
-                                .findBySlugAndPublishedTrue(slug);
-                if (post.isEmpty()) {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        return "error/404";
-                }
+        BlogPost postObj = post.get();
 
-                BlogPost postObj = post.get();
+        BlogPostLink olderPost = postRepository
+            .findOlderPublished(postObj.getCreatedAt(), postObj.getId());
 
-                BlogPostLink olderPost = postRepository
-                                .findOlderPublished(postObj.getCreatedAt(),
-                                                postObj.getId());
+        BlogPostLink newerPost = postRepository
+            .findNewerPublished(postObj.getCreatedAt(), postObj.getId());
 
-                BlogPostLink newerPost = postRepository
-                                .findNewerPublished(postObj.getCreatedAt(),
-                                                postObj.getId());
+        model.addAttribute("post", postObj);
+        model.addAttribute("olderPost", olderPost);
+        model.addAttribute("newerPost", newerPost);
+        model
+            .addAttribute("postDateFormatter",
+                POST_DATE_FORMATTER.withLocale(locale));
 
-                model.addAttribute("post", postObj);
-                model.addAttribute("olderPost", olderPost);
-                model.addAttribute("newerPost", newerPost);
-                model.addAttribute("postDateFormatter",
-                                POST_DATE_FORMATTER.withLocale(locale));
-
-                response.setHeader(HttpHeaders.CACHE_CONTROL, CacheControl
-                                .maxAge(Duration.ofSeconds(60)).cachePrivate()
-                                .getHeaderValue());
-                return "post";
-        }
+        response
+            .setHeader(HttpHeaders.CACHE_CONTROL,
+                CacheControl
+                    .maxAge(Duration.ofSeconds(60))
+                    .cachePrivate()
+                    .getHeaderValue());
+        return "post";
+    }
 }

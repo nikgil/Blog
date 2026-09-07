@@ -174,19 +174,10 @@
     overflow-wrap: anywhere;
 }
 
-/* Keep all three navigation destinations on one compact mobile row. */
+/* Keep the navigation destinations compact on mobile. */
 @media screen and (max-width: 768px) {
     .post-navigation {
         gap: 0.5rem;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .post-navigation__link--newer {
-        grid-column: 3;
-    }
-
-    .post-navigation__link--home {
-        grid-column: 2;
     }
 
     .post-navigation__link {

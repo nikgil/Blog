@@ -10,6 +10,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.sirnik.blog.controllers.HomeController.TimeFilter;
+import dev.sirnik.blog.models.projections.ArchiveMonth;
 import dev.sirnik.blog.models.projections.BlogPostPreview;
 import dev.sirnik.blog.models.projections.BlogPostTagRow;
 import dev.sirnik.blog.models.views.BlogPostPreviewView;
@@ -22,27 +24,36 @@ public class BlogPostPreviewService {
     private final BlogPostRepository blogPostRepository;
     private final TagRepository tagRepository;
 
-    public BlogPostPreviewService(
-            BlogPostRepository blogPostRepository,
-            TagRepository tagRepository) {
+    public BlogPostPreviewService(BlogPostRepository blogPostRepository,
+        TagRepository tagRepository) {
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
     }
 
-    @Transactional(readOnly = true)
-    public Slice<BlogPostPreviewView> findPreviews(Pageable pageable) {
-        Slice<BlogPostPreview> postSlice = blogPostRepository
-                .findAllByOrderByCreatedAtDescIdDesc(pageable);
+    public List<ArchiveMonth> getArchiveMonths() {
+        return blogPostRepository.findAllBlogPostsMonths();
+    }
 
-        List<Long> postIds = postSlice.getContent().stream()
-                .map(BlogPostPreview::getId)
-                .toList();
+    @Transactional(readOnly = true)
+    public Slice<BlogPostPreviewView> findPreviews(Pageable pageable,
+        TimeFilter timeFilter) {
+        Slice<BlogPostPreview> postSlice = timeFilter == null
+            ? blogPostRepository
+                .findByPublishedTrueOrderByCreatedAtDescIdDesc(pageable)
+            : blogPostRepository
+                .findByPublishedTrueAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDescIdDesc(
+                    timeFilter.startTime(), timeFilter.endTime(), pageable);
+
+        List<Long> postIds = postSlice
+            .getContent()
+            .stream()
+            .map(BlogPostPreview::getId)
+            .toList();
         Map<Long, List<BlogPostTagRow>> tagsByPostId = loadTags(postIds);
 
-        return postSlice.map(post -> new BlogPostPreviewView(
-                post,
-                tagsByPostId.getOrDefault(post.getId(),
-                        Collections.emptyList())));
+        return postSlice
+            .map(post -> new BlogPostPreviewView(post, tagsByPostId
+                .getOrDefault(post.getId(), Collections.emptyList())));
     }
 
     private Map<Long, List<BlogPostTagRow>> loadTags(List<Long> postIds) {
@@ -50,9 +61,10 @@ public class BlogPostPreviewService {
             return Collections.emptyMap();
         }
 
-        return tagRepository.findForPostIds(postIds).stream()
-                .collect(Collectors.groupingBy(
-                        BlogPostTagRow::getPostId,
-                        Collectors.toList()));
+        return tagRepository
+            .findForPostIds(postIds)
+            .stream()
+            .collect(Collectors
+                .groupingBy(BlogPostTagRow::getPostId, Collectors.toList()));
     }
 }

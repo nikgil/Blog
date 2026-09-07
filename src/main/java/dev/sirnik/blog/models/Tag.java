@@ -13,10 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "tags",
-        uniqueConstraints = @UniqueConstraint(name = "uk_tags_slug", columnNames = "slug")
-)
+@Table(name = "tags", uniqueConstraints = @UniqueConstraint(name = "uk_tags_slug", columnNames = "slug"))
 public class Tag {
 
     @Id

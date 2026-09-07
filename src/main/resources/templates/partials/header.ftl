@@ -1,5 +1,5 @@
 <#macro render>
-    <a href="/" id="blog-title">
+    <a href="?" id="blog-title">
         <h1 class="title is-1">
             sirnik.Dev
         </h1>

@@ -20,128 +20,111 @@ import dev.sirnik.blog.utils.testing.TestImageGenerator;
 
 class TestBlogPostGeneratorTests {
 
-        private static final String EXTERNAL_LINK = "https://xkcd.com/2928/";
+    private static final String EXTERNAL_LINK = "https://xkcd.com/2928/";
 
-        @TempDir
-        private Path temporaryDirectory;
+    @TempDir
+    private Path temporaryDirectory;
 
-        @Test
-        void sameSeedProducesTheSamePostsAndEnrichedContent() {
-                List<BlogPost> first = generatorFor(
-                                temporaryDirectory.resolve("first"), 5)
-                                .generatePosts(1234);
-                List<BlogPost> second = generatorFor(
-                                temporaryDirectory.resolve("second"), 5)
-                                .generatePosts(1234);
+    @Test
+    void sameSeedProducesTheSamePostsAndEnrichedContent() {
+        List<BlogPost> first = generatorFor(temporaryDirectory.resolve("first"),
+            5).generatePosts(1234);
+        List<BlogPost> second = generatorFor(
+            temporaryDirectory.resolve("second"), 5).generatePosts(1234);
 
-                assertThat(first).extracting(BlogPost::getTitle)
-                                .containsExactlyElementsOf(
-                                                second.stream().map(
-                                                                BlogPost::getTitle)
-                                                                .toList());
-                assertThat(first).extracting(BlogPost::getSlug)
-                                .containsExactlyElementsOf(
-                                                second.stream().map(
-                                                                BlogPost::getSlug)
-                                                                .toList());
-                assertThat(first).extracting(BlogPost::getContent)
-                                .containsExactlyElementsOf(
-                                                second.stream().map(
-                                                                BlogPost::getContent)
-                                                                .toList());
-        }
+        assertThat(first)
+            .extracting(BlogPost::getTitle)
+            .containsExactlyElementsOf(
+                second.stream().map(BlogPost::getTitle).toList());
+        assertThat(first)
+            .extracting(BlogPost::getSlug)
+            .containsExactlyElementsOf(
+                second.stream().map(BlogPost::getSlug).toList());
+        assertThat(first)
+            .extracting(BlogPost::getContent)
+            .containsExactlyElementsOf(
+                second.stream().map(BlogPost::getContent).toList());
+    }
 
-        @Test
-        void addsRandomLinksCodeAndResponsiveImages() {
-                List<BlogPost> posts = generatorFor(temporaryDirectory, 20)
-                                .generatePosts(20260906);
-                Set<String> knownSlugs = posts.stream()
-                                .map(BlogPost::getSlug)
-                                .collect(Collectors.toSet());
-                int externalLinkCount = 0;
-                int internalLinkCount = 0;
-                int codeBlockCount = 0;
-                int imageCount = 0;
-                int figureCaptionCount = 0;
-                int overlayCaptionCount = 0;
-                int citationCount = 0;
+    @Test
+    void addsRandomLinksCodeAndResponsiveImages() {
+        List<BlogPost> posts = generatorFor(temporaryDirectory, 20)
+            .generatePosts(20260906);
+        Set<String> knownSlugs = posts
+            .stream()
+            .map(BlogPost::getSlug)
+            .collect(Collectors.toSet());
+        int externalLinkCount = 0;
+        int internalLinkCount = 0;
+        int codeBlockCount = 0;
+        int imageCount = 0;
+        int figureCaptionCount = 0;
+        int overlayCaptionCount = 0;
+        int citationCount = 0;
 
-                for (BlogPost post : posts) {
-                        Document document = Jsoup
-                                        .parseBodyFragment(post.getContent());
+        for (BlogPost post : posts) {
+            Document document = Jsoup.parseBodyFragment(post.getContent());
 
-                        assertThat(document.select("pre + pre")).isEmpty();
+            assertThat(document.select("pre + pre")).isEmpty();
 
-                        for (Element link : document.select("p a[href]")) {
-                                assertThat(link.text()).isNotBlank();
-                                assertThat(LoremIpsumGenerator.getParagraphs(4))
-                                                .contains(link.text());
+            for (Element link : document.select("p a[href]")) {
+                assertThat(link.text()).isNotBlank();
+                assertThat(LoremIpsumGenerator.getParagraphs(4))
+                    .contains(link.text());
 
-                                String target = link.attr("href");
-                                if (target.equals(EXTERNAL_LINK)) {
-                                        externalLinkCount++;
-                                } else {
-                                        internalLinkCount++;
-                                        assertThat(target).startsWith("/posts/");
-                                        String targetSlug = target.substring(
-                                                        "/posts/".length());
-                                        assertThat(knownSlugs)
-                                                        .contains(targetSlug);
-                                        assertThat(targetSlug)
-                                                        .isNotEqualTo(
-                                                                        post.getSlug());
-                                }
-                        }
-
-                        for (Element code : document.select(
-                                        "pre > code.language-java")) {
-                                assertThat(code.text()).isNotBlank();
-                                codeBlockCount++;
-                        }
-
-                        for (Element image : document.select("figure > img")) {
-                                assertThat(image.attr("srcset"))
-                                                .contains("480w", "960w",
-                                                                "1440w");
-                                assertThat(image.attr("sizes"))
-                                                .contains("max-width: 768px");
-                                assertThat(image.attr("loading"))
-                                                .isEqualTo("lazy");
-                                assertThat(image.attr("decoding"))
-                                                .isEqualTo("async");
-                                assertThat(image.attr("width"))
-                                                .isEqualTo("960");
-                                assertThat(image.attr("height"))
-                                                .isEqualTo("540");
-                                imageCount++;
-                        }
-
-                        figureCaptionCount += document
-                                        .select("figure > figcaption").size();
-                        overlayCaptionCount += document.select(
-                                        "figure > figcaption > .generated-test-image__caption")
-                                        .size();
-                        citationCount += document
-                                        .select("figure > figcaption > cite")
-                                        .size();
+                String target = link.attr("href");
+                if (target.equals(EXTERNAL_LINK)) {
+                    externalLinkCount++;
+                } else {
+                    internalLinkCount++;
+                    assertThat(target).startsWith("/posts/");
+                    String targetSlug = target.substring("/posts/".length());
+                    assertThat(knownSlugs).contains(targetSlug);
+                    assertThat(targetSlug).isNotEqualTo(post.getSlug());
                 }
+            }
 
-                assertThat(externalLinkCount).isPositive();
-                assertThat(internalLinkCount).isPositive();
-                assertThat(codeBlockCount).isPositive();
-                assertThat(imageCount).isPositive();
-                assertThat(figureCaptionCount).isBetween(1, imageCount - 1);
-                assertThat(overlayCaptionCount).isBetween(1, imageCount - 1);
-                assertThat(citationCount).isBetween(1, imageCount - 1);
+            for (Element code : document.select("pre > code.language-java")) {
+                assertThat(code.text()).isNotBlank();
+                codeBlockCount++;
+            }
+
+            for (Element image : document.select("figure > img")) {
+                assertThat(image.attr("srcset"))
+                    .contains("480w", "960w", "1440w");
+                assertThat(image.attr("sizes")).contains("max-width: 768px");
+                assertThat(image.attr("loading")).isEqualTo("lazy");
+                assertThat(image.attr("decoding")).isEqualTo("async");
+                assertThat(image.attr("width")).isEqualTo("960");
+                assertThat(image.attr("height")).isEqualTo("540");
+                imageCount++;
+            }
+
+            figureCaptionCount += document.select("figure > figcaption").size();
+            overlayCaptionCount += document
+                .select("figure > figcaption > .generated-test-image__caption")
+                .size();
+            citationCount += document
+                .select("figure > figcaption > cite")
+                .size();
         }
 
-        private TestBlogPostGenerator generatorFor(Path imageDirectory,
-                        int postCount) {
-                TestImageGenerator imageGenerator = new TestImageGenerator(
-                                imageDirectory, "/generated-test-images/");
-                return new TestBlogPostGenerator.Builder()
-                                .setPostsToGenerate(postCount)
-                                .setImageGenerator(imageGenerator)
-                                .build();
-        }
+        assertThat(externalLinkCount).isPositive();
+        assertThat(internalLinkCount).isPositive();
+        assertThat(codeBlockCount).isPositive();
+        assertThat(imageCount).isPositive();
+        assertThat(figureCaptionCount).isBetween(1, imageCount - 1);
+        assertThat(overlayCaptionCount).isBetween(1, imageCount - 1);
+        assertThat(citationCount).isBetween(1, imageCount - 1);
+    }
+
+    private TestBlogPostGenerator generatorFor(Path imageDirectory,
+        int postCount) {
+        TestImageGenerator imageGenerator = new TestImageGenerator(
+            imageDirectory, "/generated-test-images/");
+        return new TestBlogPostGenerator.Builder()
+            .setPostsToGenerate(postCount)
+            .setImageGenerator(imageGenerator)
+            .build();
+    }
 }

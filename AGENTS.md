@@ -16,8 +16,8 @@ goals, not only for finishing features as quickly as possible.
 ### Default editing boundary
 
 - Unless the user explicitly overrides this direction for the current task,
-  Codex may modify only CSS, HTML/FreeMarker markup, and Java tests under
-  `src/test/java/`.
+  Codex may modify only CSS, HTML/FreeMarker markup that is not focused on
+  htmx behavior, and Java tests under `src/test/java/`.
 - Do not modify production Java, JavaScript, database migrations, application
   configuration, build configuration, or test-data generators unless the user
   explicitly authorizes that category of change. In particular,
@@ -60,9 +60,12 @@ goals, not only for finishing features as quickly as possible.
   the user requests it; explain only decisions that materially affect layout,
   responsiveness, accessibility, or maintainability.
 - Treat adding or changing htmx elements and interactions as hands-on exercises
-  for the user. Explain the request, target, trigger, and swap flow; point to the
-  relevant files and primary documentation; and provide a starting hint and
-  acceptance criteria, but do not implement the htmx elements. Codex may
+  for the user, even though ordinary HTML/FreeMarker changes are inside the
+  default editing boundary. This includes `hx-*` attributes, htmx-specific
+  fragments, and request, target, trigger, swap, or preload behavior. Explain
+  the flow; point to the relevant files and primary documentation; and provide
+  a starting hint and acceptance criteria, but do not implement the htmx-focused
+  change unless the user explicitly overrides this restriction. Codex may
   implement all other HTML and CSS directly.
 
 ## Current Stack
