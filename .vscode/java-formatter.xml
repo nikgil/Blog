@@ -11,5 +11,17 @@
                  value="4"/>
         <setting id="org.eclipse.jdt.core.formatter.indentation.size"
                  value="4"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation"
+                 value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.continuation_indentation_for_array_initializer"
+                 value="1"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation"
+                 value="52"/>
+        <setting id="org.eclipse.jdt.core.compiler.compliance"
+                 value="21"/>
+        <setting id="org.eclipse.jdt.core.compiler.source"
+                 value="21"/>
+        <setting id="org.eclipse.jdt.core.compiler.codegen.targetPlatform"
+                 value="21"/>
     </profile>
 </profiles>

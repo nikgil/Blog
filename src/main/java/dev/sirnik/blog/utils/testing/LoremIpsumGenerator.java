@@ -19,11 +19,12 @@ import dev.sirnik.blog.BlogApplication;
 public final class LoremIpsumGenerator {
 
     private static final List<String> PARAGRAPHS = init();
-    private static final List<String> WORDS = PARAGRAPHS.stream()
-            .flatMap(paragraph -> Arrays.stream(paragraph.split("\\s+")))
-            .toList();
+    private static final List<String> WORDS = PARAGRAPHS
+        .stream()
+        .flatMap(paragraph -> Arrays.stream(paragraph.split("\\s+")))
+        .toList();
     public static final Set<String> UNIQUE_WORDS = Collections
-            .unmodifiableSet(new HashSet<>(WORDS));
+        .unmodifiableSet(new HashSet<>(WORDS));
 
     // Static class, no construction
     private LoremIpsumGenerator() {
@@ -45,13 +46,14 @@ public final class LoremIpsumGenerator {
         String text;
         try {
             URI resourcePath = BlogApplication.class
-                    .getResource("/static/loremipsum.txt").toURI();
+                .getResource("/static/loremipsum.txt")
+                .toURI();
             Path path = Paths.get(resourcePath);
 
             text = Files.readString(path);
         } catch (IOException e) {
             throw new UncheckedIOException(
-                    "Could not read classpath resource for Lorem Ipsum", e);
+                "Could not read classpath resource for Lorem Ipsum", e);
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Invalid syntax for Lorem Ipsum");
         }
@@ -64,7 +66,7 @@ public final class LoremIpsumGenerator {
     }
 
     private static String cycle(List<String> values, int amount,
-            String separator, boolean wrapHTML) {
+        String separator, boolean wrapHTML) {
         if (amount < 0) {
             throw new IllegalArgumentException("amount must be non-negative");
         }

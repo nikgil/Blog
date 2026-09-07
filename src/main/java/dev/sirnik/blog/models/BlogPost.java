@@ -65,13 +65,26 @@ public class BlogPost {
     @PrePersist
     public void setCreationTimestamps() {
         Instant now = currentTimestamp();
-        createdAt = now;
-        updatedAt = now;
+        if (createdAt == null) {
+            createdAt = now;
+        }
+
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
     }
 
     @PreUpdate
     void setUpdateTimestamp() {
         updatedAt = currentTimestamp();
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {

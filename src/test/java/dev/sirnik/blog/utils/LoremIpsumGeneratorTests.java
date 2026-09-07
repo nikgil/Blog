@@ -12,7 +12,7 @@ class LoremIpsumGeneratorTests {
     @Test
     void returnsRequestedNumberOfWords() {
         assertThat(LoremIpsumGenerator.getWords(5))
-                .isEqualTo("Lorem ipsum dolor sit amet,");
+            .isEqualTo("Lorem ipsum dolor sit amet,");
     }
 
     @Test
@@ -26,8 +26,9 @@ class LoremIpsumGeneratorTests {
 
     @Test
     void cyclesParagraphsWhenAmountExceedsSource() {
-        String[] paragraphs = LoremIpsumGenerator.getParagraphs(7)
-                .split("\\R\\R");
+        String[] paragraphs = LoremIpsumGenerator
+            .getParagraphs(7)
+            .split("\\R\\R");
 
         assertThat(paragraphs).hasSize(7);
         assertThat(paragraphs[5]).isEqualTo(paragraphs[0]);
@@ -43,10 +44,10 @@ class LoremIpsumGeneratorTests {
     @Test
     void rejectsNegativeAmounts() {
         assertThatThrownBy(() -> LoremIpsumGenerator.getWords(-1))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("amount must be non-negative");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("amount must be non-negative");
         assertThatThrownBy(() -> LoremIpsumGenerator.getParagraphs(-1))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("amount must be non-negative");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("amount must be non-negative");
     }
 }

@@ -103,6 +103,30 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>3.9.0</version>
+				<configuration>
+					<java>
+						<eclipse>
+							<version>4.39</version>
+							<file>${project.basedir}/.vscode/java-formatter.xml</file>
+						</eclipse>
+						<trimTrailingWhitespace />
+						<endWithNewline />
+					</java>
+				</configuration>
+				<executions>
+					<execution>
+						<id>spotless-check</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.15</version>

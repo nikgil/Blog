@@ -28,12 +28,11 @@ public class HTMLParser {
     }
 
     public static boolean insertAtRandomPosition(Element parent,
-            Element element,
-            Random randomiser, boolean preventChaining) {
+        Element element, Random randomiser, boolean preventChaining) {
         int position = randomiser.nextInt(parent.childrenSize() + 1);
 
         if (preventChaining
-                && wouldChainIfInserted(parent, position, element.tagName())) {
+            && wouldChainIfInserted(parent, position, element.tagName())) {
             return false;
         }
 
@@ -47,16 +46,18 @@ public class HTMLParser {
     }
 
     private static boolean wouldChainIfInserted(Element parent, int position,
-            String elementTag) {
-        Element previousElement = position == 0 ? null
-                : parent.child(position - 1);
-        Element nextElement = position == parent.childrenSize() ? null
-                : parent.child(position);
+        String elementTag) {
+        Element previousElement = position == 0
+            ? null
+            : parent.child(position - 1);
+        Element nextElement = position == parent.childrenSize()
+            ? null
+            : parent.child(position);
 
         boolean previousMatches = previousElement != null
-                && previousElement.tagName().equals(elementTag);
+            && previousElement.tagName().equals(elementTag);
         boolean nextMatches = nextElement != null
-                && nextElement.tagName().equals(elementTag);
+            && nextElement.tagName().equals(elementTag);
 
         return previousMatches || nextMatches;
     }

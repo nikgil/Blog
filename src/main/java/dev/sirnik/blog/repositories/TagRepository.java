@@ -13,19 +13,19 @@ import dev.sirnik.blog.models.projections.BlogPostTagRow;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
-        Optional<Tag> findBySlug(String slug);
+    Optional<Tag> findBySlug(String slug);
 
-        boolean existsBySlug(String slug);
+    boolean existsBySlug(String slug);
 
-        @Query("""
-                        select post.id as postId,
-                               tag.name as name,
-                               tag.slug as slug
-                        from BlogPost post
-                        join post.tags tag
-                        where post.id in :postIds
-                        order by post.id, lower(tag.name), tag.name, tag.id
-                        """)
-        List<BlogPostTagRow> findForPostIds(
-                        @Param("postIds") Collection<Long> postIds);
+    @Query("""
+        select post.id as postId,
+               tag.name as name,
+               tag.slug as slug
+        from BlogPost post
+        join post.tags tag
+        where post.id in :postIds
+        order by post.id, lower(tag.name), tag.name, tag.id
+        """)
+    List<BlogPostTagRow> findForPostIds(
+        @Param("postIds") Collection<Long> postIds);
 }

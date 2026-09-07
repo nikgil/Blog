@@ -15,18 +15,18 @@ public class BlogPostPreviewView {
     private final String title;
     private final List<TagView> orderedTags;
 
-    public BlogPostPreviewView(
-            BlogPostPreview post,
-            List<BlogPostTagRow> orderedTagRows) {
+    public BlogPostPreviewView(BlogPostPreview post,
+        List<BlogPostTagRow> orderedTagRows) {
         id = post.getId();
         preview = post.getPreview();
         createdAt = post.getCreatedAt();
         slug = post.getSlug();
         title = post.getTitle();
 
-        orderedTags = orderedTagRows.stream()
-                .map(row -> new TagView(row.getName(), row.getSlug()))
-                .toList();
+        orderedTags = orderedTagRows
+            .stream()
+            .map(row -> new TagView(row.getName(), row.getSlug()))
+            .toList();
     }
 
     public Long getId() {
