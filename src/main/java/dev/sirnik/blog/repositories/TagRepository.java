@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import dev.sirnik.blog.models.Tag;
 import dev.sirnik.blog.models.projections.BlogPostTagRow;
+import dev.sirnik.blog.models.projections.TagLink;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
@@ -31,8 +32,18 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<BlogPostTagRow> findForPostIds(
         @Param("postIds") Collection<Long> postIds);
 
-    Slice<Tag> findAllByOrderByName(Pageable pageable);
-
-    Slice<Tag> findByNameStartingWithIgnoreCaseOrderByNameAsc(String prefix,
+    @Query("""
+        select tag.name as name,
+               tag.slug as slug,
+               count(distinct post.id) as postCount
+        from Tag tag
+        left join tag.blogPosts post on post.published = true
+        where :prefix = ''
+           or lower(tag.name) like concat(lower(:prefix), '%')
+        group by tag.id, tag.name, tag.slug
+        order by lower(tag.name), tag.name, tag.id
+        """)
+    Slice<TagLink> findTagLinks(
+        @Param("prefix") String prefix,
         Pageable pageable);
 }

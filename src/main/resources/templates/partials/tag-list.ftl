@@ -6,16 +6,17 @@
         <#list tags as tag>
           <#if tag_index lt 10>
             <li class="tag-filter__item<#if tag.slug == activeTagSlug> tag-selected__item</#if>">
-              <a class="tag tag-filter__link" href="/test-home?tag=${tag.slug?url('UTF-8')}"
-                <#if tag.slug == activeTagSlug>aria-current="true"</#if>>
-                <span aria-hidden="true">#</span><span>${tag.name}</span>
-              </a>
-            </li>
-          </#if>
-        </#list>
-        <#else>
-          <li class="tag-filter__status">No matching tags.</li>
+              <a class="tag tag-filter__link" href="/test-home?tag=${tag.slug?url('UTF-8')}" <#if
+                tag.slug==activeTagSlug>aria-current="true"
+          </#if>>
+          <span aria-hidden="true">#</span><span>${tag.name}</span><span>(${tag.postCount})</span>
+          </a>
+          </li>
     </#if>
+    </#list>
+    <#else>
+      <li class="tag-filter__status">No matching tags.</li>
+      </#if>
   </ul>
 
   <#assign currentTagPage=tagPage!0>
