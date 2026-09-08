@@ -65,7 +65,7 @@ public class DevelopmentDataConfiguration implements WebMvcConfigurer {
             }
 
             List<Tag> allTags = TestTagGenerator
-                .generateTags(tagRepository, 10, TEST_DATA_SEED);
+                .generateTags(tagRepository, 45, TEST_DATA_SEED);
 
             TestBlogPostGenerator blogPostGenerator = new TestBlogPostGenerator.Builder()
                 .setMaxTagsPerPost(5)

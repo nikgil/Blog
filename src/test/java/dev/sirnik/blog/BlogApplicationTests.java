@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 
 import java.io.StringWriter;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
+import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 import freemarker.template.Configuration;
@@ -75,7 +77,83 @@ class BlogApplicationTests {
                 .string(containsString("aria-label=\"Post archive\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("id=\"archive-years\"")));
+                .string(containsString("id=\"archive-years\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-filter-query\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-filter-results\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("hx-include=\"#selected-tag\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "id=\"selected-tag\" type=\"hidden\" name=\"tag\" value=\"\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("Loading tags…")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-page-previous\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("id=\"tag-page-next\"")));
+    }
+
+    @Test
+    void tagListPartialRendersAtMostTenTags() throws Exception {
+        List<TagLink> tags = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            tags.add(new TestTagLink("Tag " + i, "tag-" + i, i));
+        }
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/tag-list.ftl")
+            .process(Map.of("tags", tags, "tagPage", 0, "hasNextTagPage", true),
+                rendered);
+
+        assertThat(rendered.toString())
+            .contains("id=\"tag-list\"")
+            .contains("href=\"/test-home?tag=tag-0\"")
+            .contains("<span>(0)</span>")
+            .contains("Tag 9")
+            .doesNotContain("Tag 10")
+            .contains("href=\"/tags?page=1\"")
+            .contains("aria-label=\"Tag page 1\"");
+    }
+
+    @Test
+    void tagListRequestPreservesSelectionAndSearchAcrossPagination()
+        throws Exception {
+        tagRepository.save(new Tag("Spring", "spring"));
+        for (int i = 0; i < 10; i++) {
+            tagRepository.save(new Tag("Spring " + i, "spring-" + i));
+        }
+        tagRepository.flush();
+
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/tags")
+                .param("query", "Spring")
+                .param("tag", "spring"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("partials/tag-list"))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "class=\"tag-filter__item tag-selected__item\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("aria-current=\"true\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("<span>(0)</span>")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("page=1&amp;query=Spring")));
     }
 
     @Test
@@ -280,8 +358,10 @@ class BlogApplicationTests {
         blogPostRepository.saveAllAndFlush(posts);
 
         mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/test-home").param("page", "0"))
+            .perform(MockMvcRequestBuilders
+                .get("/test-home")
+                .param("page", "0")
+                .param("tag", "alpha"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("index"))
             .andExpect(MockMvcResultMatchers
@@ -307,6 +387,9 @@ class BlogApplicationTests {
                 .string(containsString("Loading more posts…")))
             .andExpect(MockMvcResultMatchers
                 .content()
+                .string(containsString("&amp;tag=alpha")))
+            .andExpect(MockMvcResultMatchers
+                .content()
                 .string(containsString("Lorem ipsum")))
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -315,8 +398,10 @@ class BlogApplicationTests {
         // The last Slice has no successor, so it must not render a new
         // trigger.
         mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/test-home").param("page", "1"))
+            .perform(MockMvcRequestBuilders
+                .get("/test-home")
+                .param("page", "1")
+                .param("tag", "alpha"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -326,10 +411,75 @@ class BlogApplicationTests {
                 .string(not(containsString("post-preview__loading"))));
     }
 
+    @Test
+    void testHomeCombinesPublishedTimeAndTagFilters() throws Exception {
+        Tag spring = tagRepository.save(new Tag("Spring", "spring"));
+        Tag java = tagRepository.save(new Tag("Java", "java"));
+
+        BlogPost matching = postAt("Matching post", "matching-post",
+            "2025-01-15T12:00:00Z", true, spring);
+        BlogPost wrongTag = postAt("Wrong tag", "wrong-tag",
+            "2025-01-16T12:00:00Z", true, java);
+        BlogPost wrongMonth = postAt("Wrong month", "wrong-month",
+            "2025-02-01T00:00:00Z", true, spring);
+        BlogPost draft = postAt("Matching draft", "matching-draft",
+            "2025-01-17T12:00:00Z", false, spring);
+        blogPostRepository
+            .saveAllAndFlush(List.of(matching, wrongTag, wrongMonth, draft));
+
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/test-home")
+                .param("year", "2025")
+                .param("month", "1")
+                .param("tag", "spring"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("Matching post")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(not(containsString("Wrong tag"))))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(not(containsString("Wrong month"))))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(not(containsString("Matching draft"))));
+    }
+
+    private BlogPost postAt(String title, String slug, String createdAt,
+        boolean published, Tag tag) {
+        BlogPost post = new BlogPost(title, slug, "<p>Article content.</p>");
+        post.setCreatedAt(Instant.parse(createdAt));
+        post.setPublished(published);
+        post.addTag(tag);
+        return post;
+    }
+
     private BlogPost savePost(String title, String slug, boolean published) {
         BlogPost post = new BlogPost(title, slug, "<p>Article content.</p>");
         post.setPublished(published);
         return blogPostRepository.save(post);
+    }
+
+    private record TestTagLink(String name, String slug,
+        long postCount) implements TagLink {
+
+        @Override
+        public String getSlug() {
+            return slug;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public long getPostCount() {
+            return postCount;
+        }
     }
 
 }

@@ -1,9 +1,5 @@
 /* Archive navigation */
-.archive-sidebar:has(.archive-nav__years:empty) {
-    display: none;
-}
-
-.archive-nav {
+.archive-sidebar {
     border-inline-start: 2px solid var(--bulma-border-weak, #dbdbdb);
     max-height: calc(100vh - 3rem);
     overflow-y: auto;
@@ -11,6 +7,10 @@
     position: sticky;
     scrollbar-width: thin;
     top: 1.5rem;
+}
+
+.archive-nav {
+    min-width: 0;
 }
 
 .archive-nav__title {
@@ -87,8 +87,130 @@
     color: var(--bulma-link-text, var(--bulma-link, #485fc7));
 }
 
+/* Tag filter */
+.tag-filter {
+    border-block-start: 1px solid var(--bulma-border-weak, #dbdbdb);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.tag-filter__title {
+    color: var(--bulma-text-weak, #7a7a7a);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.625rem;
+    text-transform: uppercase;
+}
+
+.tag-filter__input {
+    background-color: var(--bulma-scheme-main, #ffffff);
+    color: var(--bulma-text, #4a4a4a);
+}
+
+.tag-filter__input:focus {
+    border-color: var(--bulma-focus, #485fc7);
+    box-shadow: 0 0 0 0.125em color-mix(in srgb, var(--bulma-focus, #485fc7) 25%, transparent);
+}
+
+.tag-filter__results {
+    margin-top: 0.75rem;
+}
+
+.tag-filter__list {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.375rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tag-filter__item {
+    max-width: 100%;
+}
+
+.tag-selected__item {
+    font-weight: bold;
+}
+
+.tag-filter__link.tag {
+    background-color: var(--bulma-scheme-main-ter, #f5f5f5);
+    color: var(--bulma-text-strong, #363636);
+    gap: 0.2rem;
+    max-width: 100%;
+}
+
+.tag-filter__link.tag:hover,
+.tag-filter__link.tag:focus-visible {
+    background-color: var(--bulma-scheme-main-bis, #fafafa);
+    color: var(--bulma-link-text, var(--bulma-link, #485fc7));
+}
+
+.tag-filter__link.tag:focus-visible {
+    outline: 2px solid var(--bulma-focus, #485fc7);
+    outline-offset: 2px;
+}
+
+.tag-filter__link.tag.is-active,
+.tag-filter__link.tag[aria-current="page"] {
+    background-color: color-mix(in srgb, var(--bulma-link, #485fc7) 12%, transparent);
+    color: var(--bulma-link-text, var(--bulma-link, #485fc7));
+    font-weight: 600;
+}
+
+.tag-filter__status {
+    color: var(--bulma-text-weak, #7a7a7a);
+    font-size: 0.8125rem;
+    padding: 0.35rem 0.5rem;
+}
+
+.tag-filter__pagination {
+    align-items: center;
+    display: flex;
+    gap: 0.375rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+}
+
+.tag-filter__page-link.button {
+    background-color: var(--bulma-scheme-main, #ffffff);
+    border-color: var(--bulma-border-weak, #dbdbdb);
+    color: var(--bulma-text-strong, #363636);
+    height: 1.75rem;
+    min-width: 1.75rem;
+    padding: 0;
+}
+
+.tag-filter__page-link.button:hover,
+.tag-filter__page-link.button:focus-visible {
+    border-color: var(--bulma-link, #485fc7);
+    color: var(--bulma-link-text, var(--bulma-link, #485fc7));
+}
+
+.tag-filter__page-link.button:focus-visible {
+    outline: 2px solid var(--bulma-focus, #485fc7);
+    outline-offset: 2px;
+}
+
+.tag-filter__page-link.button:disabled {
+    background-color: var(--bulma-scheme-main-bis, #fafafa);
+    border-color: var(--bulma-border-weak, #dbdbdb);
+    color: var(--bulma-text-weak, #7a7a7a);
+    opacity: 0.5;
+}
+
+.tag-filter__page-number {
+    color: var(--bulma-text-weak, #7a7a7a);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
 @media screen and (min-width: 769px) {
-    .archive-layout:has(.archive-nav__years:not(:empty)) {
+    .archive-layout {
         display: grid;
         gap: clamp(2rem, 5vw, 4rem);
         grid-template-columns: minmax(8rem, 11rem) minmax(0, 1fr);
@@ -98,10 +220,12 @@
 @media screen and (max-width: 768px) {
     .archive-sidebar {
         background-color: var(--bulma-scheme-main, #ffffff);
+        border-inline-start: 0;
+        max-height: none;
         margin-bottom: 1.5rem;
-        position: sticky;
-        top: 0;
-        z-index: 10;
+        overflow: visible;
+        padding: 0;
+        position: static;
     }
 
     .archive-nav {

@@ -4,29 +4,24 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.projections.ArchiveMonth;
 import dev.sirnik.blog.models.projections.BlogPostLink;
-import dev.sirnik.blog.models.projections.BlogPostPreview;
 
-public interface BlogPostRepository extends JpaRepository<BlogPost, Long> {
+public interface BlogPostRepository
+    extends
+        JpaRepository<BlogPost, Long>,
+        JpaSpecificationExecutor<BlogPost> {
 
     @EntityGraph(attributePaths = "tags")
     Optional<BlogPost> findBySlugAndPublishedTrue(String slug);
 
     boolean existsBySlug(String slug);
-
-    Slice<BlogPostPreview> findByPublishedTrueOrderByCreatedAtDescIdDesc(
-        Pageable pageable);
-
-    Slice<BlogPostPreview> findByPublishedTrueAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDescIdDesc(
-        Instant startInclusive, Instant endExclusive, Pageable pageable);
 
     @Query("""
         SELECT p.title AS title, p.slug AS slug

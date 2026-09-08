@@ -50,6 +50,7 @@ public class HomeController {
         @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
         @RequestParam(name = "year", required = false) Integer year,
         @RequestParam(name = "month", required = false) Integer month,
+        @RequestParam(name = "tag", required = false) String tagSlug,
         Locale locale, Model model) {
         page = Math.max(0, page);
 
@@ -70,7 +71,7 @@ public class HomeController {
         TimeFilter timeFilter = createTimeFilter(year, month);
 
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
-            .findPreviews(pageable, timeFilter);
+            .findPreviews(pageable, timeFilter, tagSlug);
         Map<Integer, List<ArchiveMonth>> sortedMonths = blogPostPreviewService
             .getArchiveMonths()
             .stream()
@@ -83,6 +84,7 @@ public class HomeController {
         model.addAttribute("hasNext", posts.hasNext());
         model.addAttribute("nextPage", page + 1);
         model.addAttribute("throttle", throttle);
+        model.addAttribute("selectedTagSlug", tagSlug);
         model
             .addAttribute("postDateFormatter",
                 POST_DATE_FORMATTER.withLocale(locale));
