@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
-import dev.sirnik.blog.models.views.TagView;
+import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 import freemarker.template.Configuration;
@@ -104,9 +104,9 @@ class BlogApplicationTests {
 
     @Test
     void tagListPartialRendersAtMostTenTags() throws Exception {
-        List<TagView> tags = new ArrayList<>();
+        List<TagLink> tags = new ArrayList<>();
         for (int i = 0; i < 11; i++) {
-            tags.add(new TagView("Tag " + i, "tag-" + i));
+            tags.add(new TestTagLink("Tag " + i, "tag-" + i, i));
         }
 
         StringWriter rendered = new StringWriter();
@@ -118,6 +118,7 @@ class BlogApplicationTests {
         assertThat(rendered.toString())
             .contains("id=\"tag-list\"")
             .contains("href=\"/test-home?tag=tag-0\"")
+            .contains("<span>(0)</span>")
             .contains("Tag 9")
             .doesNotContain("Tag 10")
             .contains("href=\"/tags?page=1\"")
@@ -147,6 +148,9 @@ class BlogApplicationTests {
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("aria-current=\"true\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("<span>(0)</span>")))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("page=1&amp;query=Spring")));
@@ -457,6 +461,25 @@ class BlogApplicationTests {
         BlogPost post = new BlogPost(title, slug, "<p>Article content.</p>");
         post.setPublished(published);
         return blogPostRepository.save(post);
+    }
+
+    private record TestTagLink(String name, String slug,
+        long postCount) implements TagLink {
+
+        @Override
+        public String getSlug() {
+            return slug;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public long getPostCount() {
+            return postCount;
+        }
     }
 
 }

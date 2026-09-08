@@ -43,7 +43,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         group by tag.id, tag.name, tag.slug
         order by lower(tag.name), tag.name, tag.id
         """)
-    Slice<TagLink> findTagLinks(
-        @Param("prefix") String prefix,
+    Slice<TagLink> findTagLinks(@Param("prefix") String prefix,
         Pageable pageable);
 }
