@@ -42,8 +42,9 @@
             </ol>
           </nav>
 
-          <section class="tag-filter" aria-labelledby="tag-filter-title">
+          <section class="tag-filter" aria-labelledby="tag-filter-title" hx-include="#selected-tag">
             <h2 id="tag-filter-title" class="tag-filter__title">Tags</h2>
+            <input id="selected-tag" type="hidden" name="tag" value="${selectedTagSlug!}">
             <div class="field mb-0">
               <label class="is-sr-only" for="tag-filter-query">Search tags</label>
               <div class="control">

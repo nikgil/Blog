@@ -25,6 +25,7 @@ public class TagsController {
     public String getTags(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "query", defaultValue = "") String filterQuery,
+        @RequestParam(name = "tag", required = false) String tagSlug,
         Model model) {
         page = Math.max(0, page);
 
@@ -39,6 +40,8 @@ public class TagsController {
         model.addAttribute("hasNextTagPage", tags.hasNext());
         model.addAttribute("hasPreviousTagPage", tags.hasPrevious());
         model.addAttribute("tagPage", page);
+        model.addAttribute("query", filterQuery);
+        model.addAttribute("selectedTagSlug", tagSlug);
         return "partials/tag-list";
     }
 }

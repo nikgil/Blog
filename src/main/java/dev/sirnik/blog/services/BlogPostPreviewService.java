@@ -5,22 +5,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.controllers.HomeController.TimeFilter;
+import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.projections.ArchiveMonth;
 import dev.sirnik.blog.models.projections.BlogPostPreview;
 import dev.sirnik.blog.models.projections.BlogPostTagRow;
 import dev.sirnik.blog.models.views.BlogPostPreviewView;
 import dev.sirnik.blog.repositories.BlogPostRepository;
+import dev.sirnik.blog.repositories.BlogPostPredicates;
 import dev.sirnik.blog.repositories.TagRepository;
 
 @Service
 public class BlogPostPreviewService {
 
+    private static final Sort PREVIEW_SORT = Sort
+        .by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
     private final BlogPostRepository blogPostRepository;
     private final TagRepository tagRepository;
 
@@ -36,13 +43,25 @@ public class BlogPostPreviewService {
 
     @Transactional(readOnly = true)
     public Slice<BlogPostPreviewView> findPreviews(Pageable pageable,
-        TimeFilter timeFilter) {
-        Slice<BlogPostPreview> postSlice = timeFilter == null
-            ? blogPostRepository
-                .findByPublishedTrueOrderByCreatedAtDescIdDesc(pageable)
-            : blogPostRepository
-                .findByPublishedTrueAndCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDescIdDesc(
-                    timeFilter.startTime(), timeFilter.endTime(), pageable);
+        TimeFilter timeFilter, String tagSlug) {
+        PredicateSpecification<BlogPost> filters = BlogPostPredicates
+            .isPublished()
+            .and(BlogPostPredicates.hasTagSlug(tagSlug));
+
+        if (timeFilter != null) {
+            filters = filters
+                .and(
+                    BlogPostPredicates.createdAtOrAfter(timeFilter.startTime()))
+                .and(BlogPostPredicates.createdBefore(timeFilter.endTime()));
+        }
+
+        Pageable previewPageable = PageRequest
+            .of(pageable.getPageNumber(), pageable.getPageSize(), PREVIEW_SORT);
+        Slice<BlogPostPreview> postSlice = blogPostRepository
+            .findBy(filters,
+                query -> query
+                    .as(BlogPostPreview.class)
+                    .slice(previewPageable));
 
         List<Long> postIds = postSlice
             .getContent()

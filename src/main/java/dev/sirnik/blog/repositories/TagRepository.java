@@ -33,7 +33,6 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 
     Slice<Tag> findAllByOrderByName(Pageable pageable);
 
-    Slice<Tag> findByNameStartingWithIgnoreCaseOrderByNameAsc(
-        String prefix,
+    Slice<Tag> findByNameStartingWithIgnoreCaseOrderByNameAsc(String prefix,
         Pageable pageable);
 }

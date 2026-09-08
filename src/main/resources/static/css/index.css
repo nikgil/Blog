@@ -131,6 +131,10 @@
     max-width: 100%;
 }
 
+.tag-selected__item {
+    font-weight: bold;
+}
+
 .tag-filter__link.tag {
     background-color: var(--bulma-scheme-main-ter, #f5f5f5);
     color: var(--bulma-text-strong, #363636);

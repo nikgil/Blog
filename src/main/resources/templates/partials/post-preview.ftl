@@ -2,7 +2,7 @@
     <article class="post-preview" hx-ext="preload" <#if shouldLoadMore>
         hx-trigger="revealed"
         hx-swap="afterend"
-        hx-get="/test-home?page=${nextPage}&throttle=${throttle?c}"
+        hx-get="/test-home?page=${nextPage}&amp;throttle=${throttle?c}<#if selectedTagSlug?has_content>&amp;tag=${selectedTagSlug?url('UTF-8')}</#if>"
         hx-select="#blogs > .post-preview"
         </#if>
         >
