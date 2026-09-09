@@ -19,8 +19,8 @@ import dev.sirnik.blog.models.projections.ArchiveMonth;
 import dev.sirnik.blog.models.projections.BlogPostPreview;
 import dev.sirnik.blog.models.projections.BlogPostTagRow;
 import dev.sirnik.blog.models.views.BlogPostPreviewView;
-import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.BlogPostPredicates;
+import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 
 @Service
@@ -43,10 +43,11 @@ public class BlogPostPreviewService {
 
     @Transactional(readOnly = true)
     public Slice<BlogPostPreviewView> findPreviews(Pageable pageable,
-        TimeFilter timeFilter, String tagSlug) {
+        TimeFilter timeFilter, String tagSlug, String searchQuery) {
         PredicateSpecification<BlogPost> filters = BlogPostPredicates
             .isPublished()
-            .and(BlogPostPredicates.hasTagSlug(tagSlug));
+            .and(BlogPostPredicates.hasTagSlug(tagSlug))
+            .and(BlogPostPredicates.contentContains(searchQuery));
 
         if (timeFilter != null) {
             filters = filters

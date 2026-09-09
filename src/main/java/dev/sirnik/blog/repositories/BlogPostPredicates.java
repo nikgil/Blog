@@ -36,4 +36,18 @@ public final class BlogPostPredicates {
         return (post, builder) -> builder
             .equal(post.join("tags").get("slug"), normalizedTagSlug);
     }
+
+    public static PredicateSpecification<BlogPost> contentContains(
+        String query) {
+        if (query == null || query.isBlank()) {
+            return PredicateSpecification.unrestricted();
+        }
+
+        String normalizedQuery = "%" + query.strip().toLowerCase() + "%";
+
+        return (post, builder) -> builder
+            .like(
+                builder.lower(post.get("content")),
+                normalizedQuery);
+    }
 }

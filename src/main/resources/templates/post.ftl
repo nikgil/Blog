@@ -11,7 +11,7 @@
 <body hx-ext="preload">
     <section class="section">
         <div class="container post-page">
-            <@header.render hrefTarget="/" />
+            <@header.render />
 
             <main>
                 <article class="post">

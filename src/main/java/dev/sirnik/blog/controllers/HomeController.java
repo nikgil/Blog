@@ -40,28 +40,14 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
-        return "index";
-    }
-
-    @GetMapping("/test-home")
-    public String testHome(
+    public String home(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
         @RequestParam(name = "year", required = false) Integer year,
         @RequestParam(name = "month", required = false) Integer month,
         @RequestParam(name = "tag", required = false) String tagSlug,
+        @RequestParam(name = "query", required = false) String query,
         Locale locale, Model model) {
         page = Math.max(0, page);
-
-        if (page > 0 && throttle) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                // Doesn't matter
-            }
-        }
-
         if (month != null && year == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Month requires a year");
@@ -71,7 +57,7 @@ public class HomeController {
         TimeFilter timeFilter = createTimeFilter(year, month);
 
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
-            .findPreviews(pageable, timeFilter, tagSlug);
+            .findPreviews(pageable, timeFilter, tagSlug, query);
         Map<Integer, List<ArchiveMonth>> sortedMonths = blogPostPreviewService
             .getArchiveMonths()
             .stream()
@@ -83,7 +69,6 @@ public class HomeController {
         model.addAttribute("posts", posts.getContent());
         model.addAttribute("hasNext", posts.hasNext());
         model.addAttribute("nextPage", page + 1);
-        model.addAttribute("throttle", throttle);
         model.addAttribute("selectedTagSlug", tagSlug);
         model
             .addAttribute("postDateFormatter",

@@ -86,6 +86,25 @@ class BlogApplicationTests {
                 .string(containsString("id=\"tag-filter-results\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
+                .string(containsString("class=\"site-search\" hx-get=\"/\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "class=\"site-search__indicator htmx-indicator\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("<main id=\"blogs\">")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("href=\"mailto:blog@sirnik.dev\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("href=\"/ai-usage\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("href=\"/about\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
                 .string(containsString("hx-include=\"#selected-tag\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -103,6 +122,24 @@ class BlogApplicationTests {
     }
 
     @Test
+    void searchWithNoMatchesRendersEmptyState() throws Exception {
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .param("query", "definitely-not-in-a-post"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("class=\"search-empty\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("No results found")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("Try a different search term.")));
+    }
+
+    @Test
     void tagListPartialRendersAtMostTenTags() throws Exception {
         List<TagLink> tags = new ArrayList<>();
         for (int i = 0; i < 11; i++) {
@@ -117,7 +154,7 @@ class BlogApplicationTests {
 
         assertThat(rendered.toString())
             .contains("id=\"tag-list\"")
-            .contains("href=\"/test-home?tag=tag-0\"")
+            .contains("href=\"/?tag=tag-0\"")
             .contains("<span>(0)</span>")
             .contains("Tag 9")
             .doesNotContain("Tag 10")
@@ -338,8 +375,7 @@ class BlogApplicationTests {
     }
 
     @Test
-    void testHomeRendersOrderedPostPreviewsAndNextSliceTrigger()
-        throws Exception {
+    void homeRendersOrderedPostPreviewsAndNextSliceTrigger() throws Exception {
         Tag zulu = tagRepository.save(new Tag("Zulu", "zulu"));
         Tag alpha = tagRepository.save(new Tag("Alpha", "alpha"));
         List<BlogPost> posts = new ArrayList<>();
@@ -359,7 +395,7 @@ class BlogApplicationTests {
 
         mockMvc
             .perform(MockMvcRequestBuilders
-                .get("/test-home")
+                .get("/")
                 .param("page", "0")
                 .param("tag", "alpha"))
             .andExpect(MockMvcResultMatchers.status().isOk())
@@ -399,7 +435,7 @@ class BlogApplicationTests {
         // trigger.
         mockMvc
             .perform(MockMvcRequestBuilders
-                .get("/test-home")
+                .get("/")
                 .param("page", "1")
                 .param("tag", "alpha"))
             .andExpect(MockMvcResultMatchers.status().isOk())
@@ -412,7 +448,7 @@ class BlogApplicationTests {
     }
 
     @Test
-    void testHomeCombinesPublishedTimeAndTagFilters() throws Exception {
+    void homeCombinesPublishedTimeAndTagFilters() throws Exception {
         Tag spring = tagRepository.save(new Tag("Spring", "spring"));
         Tag java = tagRepository.save(new Tag("Java", "java"));
 
@@ -429,7 +465,7 @@ class BlogApplicationTests {
 
         mockMvc
             .perform(MockMvcRequestBuilders
-                .get("/test-home")
+                .get("/")
                 .param("year", "2025")
                 .param("month", "1")
                 .param("tag", "spring"))

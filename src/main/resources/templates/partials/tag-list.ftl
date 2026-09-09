@@ -5,8 +5,8 @@
       <#elseif tags?has_content>
         <#list tags as tag>
           <#if tag_index lt 10>
-            <li class="tag-filter__item<#if tag.slug == activeTagSlug> tag-selected__item</#if>">
-              <a class="tag tag-filter__link" href="/test-home?tag=${tag.slug?url('UTF-8')}" <#if
+            <li class="tag-filter__item posts-filter <#if tag.slug == activeTagSlug>tag-selected__item</#if>">
+              <a class="tag tag-filter__link" href="/?tag=${tag.slug?url('UTF-8')}" hx-include=".posts-filter" <#if
                 tag.slug==activeTagSlug>aria-current="true"
           </#if>>
           <span aria-hidden="true">#</span><span>${tag.name}</span><span>(${tag.postCount})</span>
