@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.server.ResponseStatusException;
 
 import dev.sirnik.blog.models.filters.PostFilters;
+import dev.sirnik.blog.models.filters.TagFilters;
 import dev.sirnik.blog.models.projections.ArchiveMonth;
 import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.models.views.BlogPostPreviewView;
@@ -58,7 +59,7 @@ public class BlogPageModel {
                 POST_DATE_FORMATTER.withLocale(locale));
     }
 
-    public void addSidebar(int tagPage, String tagQuery, Model model) {
+    public void addSidebar(TagFilters tagFilters, Model model) {
         Map<Integer, List<ArchiveMonth>> archiveMonths = blogPostPreviewService
             .getArchiveMonths()
             .stream()
@@ -67,13 +68,16 @@ public class BlogPageModel {
                     Collectors.toList()));
         model.addAttribute("archiveMonths", archiveMonths);
 
-        tagPage = Math.max(0, tagPage);
+        int tagPage = Math
+            .max(0,
+                tagFilters.getTagPage() == null ? 0 : tagFilters.getTagPage());
+        tagFilters.setTagPage(tagPage);
         Slice<TagLink> tags = tagRepository
-            .findTagLinks(tagQuery, PageRequest.of(tagPage, PAGE_SIZE));
+            .findTagLinks(tagFilters.getTagQuery(),
+                PageRequest.of(tagPage, PAGE_SIZE));
+        model.addAttribute("tagFilters", tagFilters);
         model.addAttribute("tags", tags.getContent());
         model.addAttribute("hasNextTagPage", tags.hasNext());
         model.addAttribute("hasPreviousTagPage", tags.hasPrevious());
-        model.addAttribute("tagPage", tagPage);
-        model.addAttribute("tagQuery", tagQuery);
     }
 }

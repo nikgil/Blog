@@ -34,6 +34,7 @@ import dev.sirnik.blog.controllers.HomeController;
 import dev.sirnik.blog.controllers.PostListController;
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
+import dev.sirnik.blog.models.filters.TagFilters;
 import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
@@ -103,6 +104,9 @@ class BlogApplicationTests {
                 .string(containsString("hx-target=\"#blog-content\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
+                .string(containsString("hx-swap=\"outerHTML show:none\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
                 .string(containsString(
                     "class=\"site-search__indicator htmx-indicator\"")))
             .andExpect(MockMvcResultMatchers
@@ -161,9 +165,12 @@ class BlogApplicationTests {
         }
 
         StringWriter rendered = new StringWriter();
+        TagFilters tagFilters = new TagFilters();
         freeMarkerConfiguration
             .getTemplate("partials/tag-list.ftl")
-            .process(Map.of("tags", tags, "tagPage", 0, "hasNextTagPage", true),
+            .process(Map
+                .of("tags", tags, "tagFilters", tagFilters, "hasNextTagPage",
+                    true),
                 rendered);
 
         assertThat(rendered.toString())
@@ -196,8 +203,9 @@ class BlogApplicationTests {
                 .param("month", "1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("partials/tag-list"))
-            .andExpect(
-                MockMvcResultMatchers.model().attribute("tagQuery", "Spring"))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("tagFilters", hasProperty("tagQuery", is("Spring"))))
             .andExpect(MockMvcResultMatchers
                 .model()
                 .attribute("filters", hasProperty("query", is("backend"))))
@@ -640,13 +648,14 @@ class BlogApplicationTests {
             .doesNotContain("February article");
         assertThat(fragment.body().children()).hasSize(1);
         assertThat(fragment.body().child(0).id()).isEqualTo("blog-content");
-        assertThat(fragment.select("#post-filters, #tag-filter")).hasSize(2);
+        assertThat(fragment.select("#post-filters")).isEmpty();
+        assertThat(fragment.select("#tag-filter")).hasSize(1);
         assertThat(fragment.select("[hx-swap-oob]")).isEmpty();
         assertThat(fragment.select("#tag-filter-query").val())
             .isEqualTo("Spring");
         assertThat(fragment.select("#tag-filter").attr("hx-trigger"))
             .doesNotContain("load");
-        assertThat(fragment.select("#post-filters [name=tag]").val())
+        assertThat(fragment.select("#post-filter-state [name=tag]").val())
             .isEqualTo("spring-10");
         assertThat(fragment.select("#tag-filter [name=query]").val())
             .isEqualTo("Article");
@@ -676,9 +685,10 @@ class BlogApplicationTests {
         Document clearedFragment = Jsoup
             .parse(cleared.getResponse().getContentAsString());
         assertThat(clearedFragment.select("#blogs > .post-preview")).hasSize(2);
-        assertThat(clearedFragment.select("#post-filters [name=month]"))
+        assertThat(clearedFragment.select("#post-filter-state [name=month]"))
             .isEmpty();
-        assertThat(clearedFragment.select("#post-filters [name=year]").val())
+        assertThat(
+            clearedFragment.select("#post-filter-state [name=year]").val())
             .isEqualTo("2025");
         assertThat(clearedFragment.select("#tag-page-state").val())
             .isEqualTo("1");
@@ -752,6 +762,7 @@ class BlogApplicationTests {
             Document page = Jsoup.parse(html);
             assertThat(page.select("#blogs, #tag-filter, #post-filters"))
                 .hasSize(3);
+            assertThat(page.select("#blog-content #post-filters")).isEmpty();
             assertThat(page.select("#post-filters").attr("hx-target"))
                 .isEqualTo("#blog-content");
             assertThat(page.select("#tag-filter").attr("hx-trigger"))
@@ -794,7 +805,9 @@ class BlogApplicationTests {
                 .model()
                 .attributeDoesNotExist("appendPosts", "updateFilters"))
             .andExpect(MockMvcResultMatchers.model().attribute("nextPage", 1))
-            .andExpect(MockMvcResultMatchers.model().attribute("tagPage", 0))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("tagFilters", hasProperty("tagPage", is(0))))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("<main id=\"blogs\">")));

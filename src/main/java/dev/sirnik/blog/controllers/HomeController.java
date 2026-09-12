@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import dev.sirnik.blog.models.filters.PostFilters;
+import dev.sirnik.blog.models.filters.TagFilters;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
@@ -25,15 +26,14 @@ public class HomeController {
     @GetMapping("/")
     public String home(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "tagPage", defaultValue = "0") int tagPage,
-        @RequestParam(name = "tagQuery", defaultValue = "") String tagQuery,
         @ModelAttribute("filters") PostFilters filters, Locale locale,
-        Model model, HttpServletResponse response) {
+        @ModelAttribute("tagFilters") TagFilters tagFilters, Model model,
+        HttpServletResponse response) {
         response
             .addHeader(HttpHeaders.VARY,
                 "HX-Request, HX-History-Restore-Request");
         blogPageModel.addPosts(page, filters, locale, model);
-        blogPageModel.addSidebar(tagPage, tagQuery, model);
+        blogPageModel.addSidebar(tagFilters, model);
         return "index";
     }
 }

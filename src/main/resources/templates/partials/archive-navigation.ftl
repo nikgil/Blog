@@ -6,7 +6,7 @@
   , "October" , "November" , "December" ]>
 
   <nav id="archive-navigation" class="archive-nav" aria-label="Post archive"
-    hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML" hx-sync="#post-filters:replace"
+    hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML show:none" hx-sync="#post-filters:replace"
     hx-include="#tag-filter-query, #tag-page-state">
     <p class="archive-nav__title">Archive</p>
     <ol id="archive-years" class="archive-nav__years">

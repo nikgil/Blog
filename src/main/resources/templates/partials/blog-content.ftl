@@ -1,6 +1,15 @@
-<#import "header.ftl" as header>
-<div id="blog-content" class="container">
-  <@header.render hrefTarget="?" filters=filters partialSearch=true />
+<div id="blog-content">
+  <div id="post-filter-state" hidden>
+    <#if (filters.tag!"")?has_content>
+      <input type="hidden" name="tag" value="${filters.tag?html}">
+    </#if>
+    <#if (filters.year!"")?has_content>
+      <input type="hidden" name="year" value="${filters.year?c}">
+    </#if>
+    <#if (filters.month!"")?has_content>
+      <input type="hidden" name="month" value="${filters.month?c}">
+    </#if>
+  </div>
   <div id="archive-layout" class="archive-layout">
     <aside class="archive-sidebar">
       <#include "archive-navigation.ftl">
@@ -24,7 +33,7 @@
           <label class="is-sr-only" for="tag-filter-query">Search tags</label>
           <div class="control">
             <input id="tag-filter-query" class="input is-small tag-filter__input" type="search" name="tagQuery"
-              value="${(tagQuery!"")?html}" placeholder="Search tags" autocomplete="off" aria-controls="tag-list">
+              value="${(tagFilters.tagQuery!"")?html}" placeholder="Search tags" autocomplete="off" aria-controls="tag-list">
           </div>
         </div>
         <div id="tag-filter-results" class="tag-filter__results" aria-live="polite">

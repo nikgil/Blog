@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import dev.sirnik.blog.models.filters.PostFilters;
+import dev.sirnik.blog.models.filters.TagFilters;
 import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.TagRepository;
 
@@ -26,19 +27,20 @@ public class TagsController {
     @GetMapping("/tags")
     public String getTags(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "tagQuery", defaultValue = "") String tagQuery,
-        @ModelAttribute("filters") PostFilters filters, Model model) {
+        @ModelAttribute("filters") PostFilters filters,
+        @ModelAttribute("tagFilters") TagFilters tagFilters, Model model) {
         page = Math.max(0, page);
+        tagFilters.setTagPage(page);
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
 
-        Slice<TagLink> tags = tagRepo.findTagLinks(tagQuery, pageable);
+        Slice<TagLink> tags = tagRepo
+            .findTagLinks(tagFilters.getTagQuery(), pageable);
 
+        model.addAttribute("tagFilters", tagFilters);
         model.addAttribute("tags", tags.getContent());
         model.addAttribute("hasNextTagPage", tags.hasNext());
         model.addAttribute("hasPreviousTagPage", tags.hasPrevious());
-        model.addAttribute("tagPage", page);
-        model.addAttribute("tagQuery", tagQuery);
         return "partials/tag-list";
     }
 }

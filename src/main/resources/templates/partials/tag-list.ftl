@@ -4,7 +4,7 @@
 <#assign currentMonth=(filters.month)!"">
 
 <ul id="tag-list" class="tag-filter__list" aria-label="Available tags"
-  hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML" hx-sync="#post-filters:replace"
+  hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML show:none" hx-sync="#post-filters:replace"
   hx-include="#tag-filter-query, #tag-page-state">
   <#if tagsLoading!false>
     <li class="tag-filter__status">Loading tags…</li>
@@ -42,7 +42,7 @@
   </#if>
 </ul>
 
-<#assign currentTagPage=tagPage!0>
+<#assign currentTagPage=(tagFilters.tagPage)!0>
 <input id="tag-page-state" type="hidden" name="tagPage" value="${currentTagPage?c}">
 <nav class="tag-filter__pagination" aria-label="Tag pages">
   <#if hasPreviousTagPage!false>
