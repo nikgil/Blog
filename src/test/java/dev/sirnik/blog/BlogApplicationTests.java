@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -212,10 +214,18 @@ class BlogApplicationTests {
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("<span>(0)</span>")))
-            .andExpect(MockMvcResultMatchers
-                .content()
-                .string(containsString(
-                    "href=\"/?year=2025&amp;month=1&amp;query=backend\"")))
+            .andExpect(result -> {
+                Document page = Jsoup
+                    .parse(result.getResponse().getContentAsString());
+                assertThat(page
+                    .select(".tag-filter__link[aria-current=true]")
+                    .eachAttr("href"))
+                    .containsExactly("/?year=2025&month=1&query=backend");
+                assertThat(page
+                    .select(".tag-filter__link:not([aria-current])")
+                    .eachAttr("href"))
+                    .contains("/?tag=spring-0&year=2025&month=1&query=backend");
+            })
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("type=\"submit\" name=\"page\"")))
@@ -549,10 +559,30 @@ class BlogApplicationTests {
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(not(containsString("postQuery"))))
-            .andExpect(MockMvcResultMatchers
-                .content()
-                .string(containsString(
-                    "/?year=2025&amp;month=1&amp;tag=spring&amp;query=Matching")));
+            .andExpect(result -> {
+                Document page = Jsoup
+                    .parse(result.getResponse().getContentAsString());
+                // Clicking the selected month clears only the month.
+                assertThat(page
+                    .select(
+                        ".archive-nav__month-link.archive-nav__selected-link")
+                    .eachAttr("href"))
+                    .containsExactly("/?year=2025&tag=spring&query=Matching");
+                // Clearing the year also clears its dependent month.
+                assertThat(page
+                    .select(
+                        ".archive-nav__year-link.archive-nav__selected-link")
+                    .eachAttr("href"))
+                    .singleElement()
+                    .asString()
+                    .contains("tag=spring", "query=Matching")
+                    .doesNotContain("year=", "month=");
+                assertThat(page
+                    .select(
+                        ".archive-nav__month-link:not(.archive-nav__selected-link)")
+                    .eachAttr("href"))
+                    .contains("/?year=2025&month=2&tag=spring&query=Matching");
+            });
     }
 
     private BlogPost postAt(String title, String slug, String createdAt,
