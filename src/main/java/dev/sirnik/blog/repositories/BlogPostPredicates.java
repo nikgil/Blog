@@ -46,8 +46,6 @@ public final class BlogPostPredicates {
         String normalizedQuery = "%" + query.strip().toLowerCase() + "%";
 
         return (post, builder) -> builder
-            .like(
-                builder.lower(post.get("content")),
-                normalizedQuery);
+            .like(builder.lower(post.get("content")), normalizedQuery);
     }
 }

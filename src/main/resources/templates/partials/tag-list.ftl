@@ -27,7 +27,10 @@
             href="/<#if postParameters?has_content>?${postParameters?join('&amp;')}</#if>"
             <#if tag.slug == activeTagSlug>aria-current="true"</#if>>
             <span aria-hidden="true">#</span><span>${tag.name}</span><span>(${tag.postCount})</span>
-            <#if tag.slug == activeTagSlug><span>x</span></#if>
+            <#if tag.slug == activeTagSlug>
+              <span class="tag-filter__clear" aria-hidden="true">×</span>
+              <span class="is-sr-only"> — clear tag filter</span>
+            </#if>
           </a>
         </li>
       </#if>

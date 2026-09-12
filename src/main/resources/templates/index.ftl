@@ -6,8 +6,6 @@
     <@head.render title="sirnik.Dev" stylesheet="index" />
     <#import "partials/post-preview.ftl" as preview>
       <#import "partials/header.ftl" as header>
-        <#assign monthNames=[ "January" , "February" , "March" , "April" , "May" , "June" , "July" , "August"
-          , "September" , "October" , "November" , "December" ]>
         <#assign currentQuery=(filters.query)!"">
           <#assign currentTag=(filters.tag)!"">
             <#assign currentYear=(filters.year)!"">
@@ -20,32 +18,7 @@
       <@header.render hrefTarget="?" filters=filters />
       <div id="archive-layout" class="archive-layout">
         <aside class="archive-sidebar">
-          <nav id="archive-navigation" class="archive-nav" aria-label="Post archive">
-            <p class="archive-nav__title">Archive</p>
-            <ol id="archive-years" class="archive-nav__years">
-              <#list archiveMonths!{} as year, valueList>
-                <li class="archive-nav__year">
-                  <a class="archive-nav__link archive-nav__year-link"
-                    href="/?year=${year?c}<#if currentTag?has_content>&amp;tag=${currentTag?url('UTF-8')}</#if><#if currentQuery?has_content>&amp;query=${currentQuery?url('UTF-8')}</#if>">
-                    ${year?c}
-                  </a>
-                  <ol class="archive-nav__months">
-                    <#list valueList as archiveMonth>
-                      <li class="archive-nav__month">
-                        <a class="archive-nav__link archive-nav__month-link"
-                          href="/?year=${year?c}&amp;month=${archiveMonth.month?c}<#if currentTag?has_content>&amp;tag=${currentTag?url('UTF-8')}</#if><#if currentQuery?has_content>&amp;query=${currentQuery?url('UTF-8')}</#if>">
-                          <span>${monthNames[archiveMonth.month - 1]}</span>
-                          <span class="archive-nav__count" aria-label="${archiveMonth.postCount?c} posts">
-                            ${archiveMonth.postCount?c}
-                          </span>
-                        </a>
-                      </li>
-                    </#list>
-                  </ol>
-                </li>
-              </#list>
-            </ol>
-          </nav>
+          <#include "partials/archive-navigation.ftl">
 
           <form class="tag-filter" action="/tags" method="get" aria-labelledby="tag-filter-title" hx-get="/tags"
             hx-trigger="load, submit, input changed delay:500ms" hx-target="#tag-filter-results"
