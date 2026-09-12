@@ -83,10 +83,17 @@ class BlogApplicationTests {
                 .string(containsString("id=\"tag-filter-query\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
+                .string(containsString("name=\"tagQuery\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
                 .string(containsString("id=\"tag-filter-results\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("class=\"site-search\" hx-get=\"/\"")))
+                .string(containsString(
+                    "id=\"post-filters\" class=\"site-search\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("hx-target=\"#archive-layout\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString(
@@ -105,11 +112,10 @@ class BlogApplicationTests {
                 .string(containsString("href=\"/about\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("hx-include=\"#selected-tag\"")))
+                .string(not(containsString("hx-include="))))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString(
-                    "id=\"selected-tag\" type=\"hidden\" name=\"tag\" value=\"\"")))
+                .string(not(containsString("posts-filter"))))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("Loading tags…")))
@@ -158,7 +164,8 @@ class BlogApplicationTests {
             .contains("<span>(0)</span>")
             .contains("Tag 9")
             .doesNotContain("Tag 10")
-            .contains("href=\"/tags?page=1\"")
+            .contains("name=\"page\"")
+            .contains("value=\"1\"")
             .contains("aria-label=\"Tag page 1\"");
     }
 
@@ -174,10 +181,27 @@ class BlogApplicationTests {
         mockMvc
             .perform(MockMvcRequestBuilders
                 .get("/tags")
-                .param("query", "Spring")
-                .param("tag", "spring"))
+                .param("tagQuery", "Spring")
+                .param("query", "backend")
+                .param("tag", "spring")
+                .param("year", "2025")
+                .param("month", "1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("partials/tag-list"))
+            .andExpect(
+                MockMvcResultMatchers.model().attribute("tagQuery", "Spring"))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("query", is("backend"))))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("tag", is("spring"))))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("year", is(2025))))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("month", is(1))))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString(
@@ -190,7 +214,14 @@ class BlogApplicationTests {
                 .string(containsString("<span>(0)</span>")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("page=1&amp;query=Spring")));
+                .string(containsString(
+                    "href=\"/?year=2025&amp;month=1&amp;query=backend\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("type=\"submit\" name=\"page\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("value=\"1\"")));
     }
 
     @Test
@@ -471,6 +502,15 @@ class BlogApplicationTests {
                 .param("tag", "spring"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("tag", is("spring"))))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("year", is(2025))))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("filters", hasProperty("month", is(1))))
+            .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("Matching post")))
             .andExpect(MockMvcResultMatchers
@@ -482,6 +522,37 @@ class BlogApplicationTests {
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(not(containsString("Matching draft"))));
+
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .param("year", "2025")
+                .param("month", "1")
+                .param("tag", "spring")
+                .param("query", "Matching"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("value=\"Matching\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "type=\"hidden\" name=\"tag\" value=\"spring\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "type=\"hidden\" name=\"year\" value=\"2025\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "type=\"hidden\" name=\"month\" value=\"1\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(not(containsString("postQuery"))))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString(
+                    "/?year=2025&amp;month=1&amp;tag=spring&amp;query=Matching")));
     }
 
     private BlogPost postAt(String title, String slug, String createdAt,

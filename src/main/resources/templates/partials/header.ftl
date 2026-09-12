@@ -1,4 +1,8 @@
-<#macro render hrefTarget="/">
+<#macro render hrefTarget="/" filters={}>
+    <#local currentQuery=(filters.query)!"">
+    <#local currentTag=(filters.tag)!"">
+    <#local currentYear=(filters.year)!"">
+    <#local currentMonth=(filters.month)!"">
     <header class="site-header">
         <div class="site-header__identity">
             <a href="${hrefTarget}" id="blog-title">
@@ -12,12 +16,21 @@
         </div>
 
         <nav class="site-nav" aria-label="Primary navigation">
-            <form class="site-search posts-filter" hx-get="/" role="search" hx-target="#blogs" hx-select="#blogs"
-                hx-include=".posts-filter" hx-swap="innerHTML"
-                hx-trigger="input changed delay:750ms, keyup[key=='Enter']" hx-replace-url="true">
+            <form id="post-filters" class="site-search" action="/" method="get" hx-get="/" role="search"
+                hx-target="#archive-layout" hx-select="#archive-layout" hx-swap="outerHTML"
+                hx-trigger="submit, input changed delay:750ms" hx-replace-url="true">
                 <label class="is-sr-only" for="site-search-query">Search the blog</label>
                 <input class="site-search__input" id="site-search-query" name="query" type="search" placeholder="Search"
-                    autocomplete="off">
+                    autocomplete="off" value="${currentQuery?html}">
+                <#if currentTag?has_content>
+                    <input type="hidden" name="tag" value="${currentTag?html}">
+                </#if>
+                <#if currentYear?has_content>
+                    <input type="hidden" name="year" value="${currentYear?c}">
+                </#if>
+                <#if currentMonth?has_content>
+                    <input type="hidden" name="month" value="${currentMonth?c}">
+                </#if>
                 <button class="site-search__button" type="submit" aria-label="Search">
                     <span class="site-search__indicator htmx-indicator" aria-hidden="true"></span>
                     <svg class="site-search__icon" aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
