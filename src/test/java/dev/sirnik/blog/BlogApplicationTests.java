@@ -30,8 +30,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.sirnik.blog.controllers.HomeController;
+import dev.sirnik.blog.controllers.PostListController;
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
+import dev.sirnik.blog.models.filters.TagFilters;
 import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
@@ -67,6 +70,9 @@ class BlogApplicationTests {
         mockMvc
             .perform(MockMvcRequestBuilders.get("/"))
             .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(HomeController.class))
             .andExpect(MockMvcResultMatchers.view().name("index"))
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -95,7 +101,10 @@ class BlogApplicationTests {
                     "id=\"post-filters\" class=\"site-search\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("hx-target=\"#archive-layout\"")))
+                .string(containsString("hx-target=\"#blog-content\"")))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("hx-swap=\"outerHTML show:none\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString(
@@ -114,13 +123,14 @@ class BlogApplicationTests {
                 .string(containsString("href=\"/about\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(not(containsString("hx-include="))))
+                .string(containsString(
+                    "hx-include=\"#tag-filter-query, #tag-page-state\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(not(containsString("posts-filter"))))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString("Loading tags…")))
+                .string(not(containsString("Loading tags…"))))
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("id=\"tag-page-previous\"")))
@@ -155,9 +165,12 @@ class BlogApplicationTests {
         }
 
         StringWriter rendered = new StringWriter();
+        TagFilters tagFilters = new TagFilters();
         freeMarkerConfiguration
             .getTemplate("partials/tag-list.ftl")
-            .process(Map.of("tags", tags, "tagPage", 0, "hasNextTagPage", true),
+            .process(Map
+                .of("tags", tags, "tagFilters", tagFilters, "hasNextTagPage",
+                    true),
                 rendered);
 
         assertThat(rendered.toString())
@@ -190,8 +203,9 @@ class BlogApplicationTests {
                 .param("month", "1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.view().name("partials/tag-list"))
-            .andExpect(
-                MockMvcResultMatchers.model().attribute("tagQuery", "Spring"))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("tagFilters", hasProperty("tagQuery", is("Spring"))))
             .andExpect(MockMvcResultMatchers
                 .model()
                 .attribute("filters", hasProperty("query", is("backend"))))
@@ -440,6 +454,9 @@ class BlogApplicationTests {
                 .param("page", "0")
                 .param("tag", "alpha"))
             .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(HomeController.class))
             .andExpect(MockMvcResultMatchers.view().name("index"))
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -583,6 +600,217 @@ class BlogApplicationTests {
                     .eachAttr("href"))
                     .contains("/?year=2025&month=2&tag=spring&query=Matching");
             });
+    }
+
+    @Test
+    void htmxFilteringReplacesBlogContentAndPreservesFilters()
+        throws Exception {
+        List<Tag> tags = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            tags
+                .add(tagRepository
+                    .save(new Tag("Spring %02d".formatted(i), "spring-" + i)));
+        }
+        BlogPost matching = postAt("January article", "january-article",
+            "2025-01-15T12:00:00Z", true, tags.get(10));
+        BlogPost february = postAt("February article", "february-article",
+            "2025-02-15T12:00:00Z", true, tags.get(10));
+        blogPostRepository.saveAllAndFlush(List.of(matching, february));
+
+        var result = mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .header("HX-Request", "true")
+                .param("year", "2025")
+                .param("month", "1")
+                .param("tag", "spring-10")
+                .param("query", "Article")
+                .param("tagQuery", "Spring")
+                .param("tagPage", "1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(PostListController.class))
+            .andExpect(
+                MockMvcResultMatchers.view().name("partials/blog-content"))
+            .andExpect(MockMvcResultMatchers
+                .header()
+                .string(HttpHeaders.VARY, containsString("HX-Request")))
+            .andReturn();
+        String html = result.getResponse().getContentAsString();
+        assertThat(html)
+            .doesNotContain("<!DOCTYPE", "<html", "<head>", "<script",
+                "Loading tags…");
+        Document fragment = Jsoup.parse(html);
+        assertThat(fragment.select("#blogs > .post-preview")).hasSize(1);
+        assertThat(fragment.select("#blogs").text())
+            .contains("January article")
+            .doesNotContain("February article");
+        assertThat(fragment.body().children()).hasSize(1);
+        assertThat(fragment.body().child(0).id()).isEqualTo("blog-content");
+        assertThat(fragment.select("#post-filters")).isEmpty();
+        assertThat(fragment.select("#tag-filter")).hasSize(1);
+        assertThat(fragment.select("[hx-swap-oob]")).isEmpty();
+        assertThat(fragment.select("#tag-filter-query").val())
+            .isEqualTo("Spring");
+        assertThat(fragment.select("#tag-filter").attr("hx-trigger"))
+            .doesNotContain("load");
+        assertThat(fragment.select("#post-filter-state [name=tag]").val())
+            .isEqualTo("spring-10");
+        assertThat(fragment.select("#tag-filter [name=query]").val())
+            .isEqualTo("Article");
+        assertThat(fragment.select("#tag-page-state").val()).isEqualTo("1");
+        assertThat(fragment.select("#tag-list .tag-filter__link")).hasSize(1);
+        assertThat(fragment.select("#tag-list [aria-current=true]").text())
+            .contains("Spring 10", "clear tag filter");
+
+        // Follow the rendered month-clear link, preserving the tag browser
+        // state.
+        String clearMonth = fragment
+            .select(".archive-nav__month-link.archive-nav__selected-link")
+            .attr("href");
+        var cleared = mockMvc
+            .perform(MockMvcRequestBuilders
+                .get(clearMonth)
+                .header("HX-Request", "true")
+                .param("tagQuery", "Spring")
+                .param("tagPage", "1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(PostListController.class))
+            .andExpect(
+                MockMvcResultMatchers.view().name("partials/blog-content"))
+            .andReturn();
+        Document clearedFragment = Jsoup
+            .parse(cleared.getResponse().getContentAsString());
+        assertThat(clearedFragment.select("#blogs > .post-preview")).hasSize(2);
+        assertThat(clearedFragment.select("#post-filter-state [name=month]"))
+            .isEmpty();
+        assertThat(
+            clearedFragment.select("#post-filter-state [name=year]").val())
+            .isEqualTo("2025");
+        assertThat(clearedFragment.select("#tag-page-state").val())
+            .isEqualTo("1");
+    }
+
+    @Test
+    void htmxInfiniteScrollReturnsOnlyNextPostCards() throws Exception {
+        Tag tag = tagRepository.save(new Tag("Java", "java"));
+        List<BlogPost> posts = new ArrayList<>();
+        for (int i = 0; i < 11; i++) {
+            posts
+                .add(postAt("Article " + i, "article-" + i,
+                    "2025-01-%02dT12:00:00Z".formatted(i + 1), true, tag));
+        }
+        blogPostRepository.saveAllAndFlush(posts);
+        var result = mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .header("HX-Request", "true")
+                .param("page", "1")
+                .param("tag", "java")
+                .param("year", "2025")
+                .param("month", "1")
+                .param("query", "Article"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(PostListController.class))
+            .andExpect(MockMvcResultMatchers.view().name("partials/post-items"))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attributeDoesNotExist("archiveMonths", "tags"))
+            .andReturn();
+        Document fragment = Jsoup
+            .parse(result.getResponse().getContentAsString());
+        assertThat(fragment.body().children()).hasSize(1);
+        assertThat(fragment.select(".post-preview").text())
+            .contains("Article 0");
+        assertThat(fragment.select("main, [hx-swap-oob], [hx-get]")).isEmpty();
+
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .header("HX-Request", "true")
+                .param("page", "2"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(resultAfterLast -> assertThat(
+                resultAfterLast.getResponse().getContentAsString()).isBlank());
+    }
+
+    @Test
+    void historyRestorationReturnsFullPageAndNormalNavigationKeepsWorking()
+        throws Exception {
+        for (boolean htmx : List.of(false, true)) {
+            var result = mockMvc
+                .perform(MockMvcRequestBuilders
+                    .get("/")
+                    .header("HX-Request", Boolean.toString(htmx))
+                    .header("HX-History-Restore-Request", "true")
+                    .param("page", "1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers
+                    .handler()
+                    .handlerType(HomeController.class))
+                .andExpect(MockMvcResultMatchers.view().name("index"))
+                .andReturn();
+            String html = result.getResponse().getContentAsString();
+            assertThat(html)
+                .contains("<!DOCTYPE HTML>")
+                .doesNotContain("hx-swap-oob", "hx-select", "Loading tags…");
+            Document page = Jsoup.parse(html);
+            assertThat(page.select("#blogs, #tag-filter, #post-filters"))
+                .hasSize(3);
+            assertThat(page.select("#blog-content #post-filters")).isEmpty();
+            assertThat(page.select("#post-filters").attr("hx-target"))
+                .isEqualTo("#blog-content");
+            assertThat(page.select("#tag-filter").attr("hx-trigger"))
+                .doesNotContain("load");
+        }
+    }
+
+    @Test
+    void bothControllersRejectMonthWithoutYear() throws Exception {
+        for (boolean htmx : List.of(false, true)) {
+            mockMvc
+                .perform(MockMvcRequestBuilders
+                    .get("/")
+                    .header("HX-Request", Boolean.toString(htmx))
+                    .param("month", "1"))
+                .andExpect(MockMvcResultMatchers
+                    .handler()
+                    .handlerType(
+                        htmx ? PostListController.class : HomeController.class))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        }
+    }
+
+    @Test
+    void negativeFragmentPageReplacesListInsteadOfAppending() throws Exception {
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/")
+                .header("HX-Request", "true")
+                .header("HX-History-Restore-Request", "false")
+                .param("page", "-1")
+                .param("tagPage", "-1"))
+            .andExpect(MockMvcResultMatchers
+                .handler()
+                .handlerType(PostListController.class))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.view().name("partials/blog-content"))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attributeDoesNotExist("appendPosts", "updateFilters"))
+            .andExpect(MockMvcResultMatchers.model().attribute("nextPage", 1))
+            .andExpect(MockMvcResultMatchers
+                .model()
+                .attribute("tagFilters", hasProperty("tagPage", is(0))))
+            .andExpect(MockMvcResultMatchers
+                .content()
+                .string(containsString("<main id=\"blogs\">")));
     }
 
     private BlogPost postAt(String title, String slug, String createdAt,
