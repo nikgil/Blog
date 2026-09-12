@@ -1,8 +1,12 @@
-<#macro render post shouldLoadMore>
+<#macro render post shouldLoadMore filters={}>
+    <#local currentQuery=(filters.query)!"">
+    <#local currentTag=(filters.tag)!"">
+    <#local currentYear=(filters.year)!"">
+    <#local currentMonth=(filters.month)!"">
     <article class="post-preview" hx-ext="preload" <#if shouldLoadMore>
         hx-trigger="revealed"
         hx-swap="afterend"
-        hx-get="/test-home?page=${nextPage}&amp;throttle=${throttle?c}<#if selectedTagSlug?has_content>&amp;tag=${selectedTagSlug?url('UTF-8')}</#if>"
+        hx-get="/?page=${nextPage}<#if currentYear?has_content>&amp;year=${currentYear?c}</#if><#if currentMonth?has_content>&amp;month=${currentMonth?c}</#if><#if currentTag?has_content>&amp;tag=${currentTag?url('UTF-8')}</#if><#if currentQuery?has_content>&amp;query=${currentQuery?url('UTF-8')}</#if>"
         hx-select="#blogs > .post-preview"
         </#if>
         >

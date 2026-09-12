@@ -190,4 +190,6 @@ Back up PostgreSQL before deployments that introduce new Flyway migrations.
 
 - [ ] Menu bar to the right of the header
 - [ ] Make search work
-- [ ] Make tag search work
+- [ ] Add editor
+- [ ] Add publish toggle
+- [ ] Add admin login

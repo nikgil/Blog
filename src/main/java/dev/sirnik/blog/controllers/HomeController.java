@@ -1,9 +1,6 @@
 package dev.sirnik.blog.controllers;
 
-import java.time.Instant;
-import java.time.YearMonth;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.LinkedHashMap;
@@ -19,10 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import dev.sirnik.blog.models.projections.ArchiveMonth;
+import dev.sirnik.blog.models.filters.PostFilters;
 import dev.sirnik.blog.models.views.BlogPostPreviewView;
 import dev.sirnik.blog.services.BlogPostPreviewService;
 
@@ -40,38 +39,20 @@ public class HomeController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
-        return "index";
-    }
-
-    @GetMapping("/test-home")
-    public String testHome(
+    public String home(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "throttle", defaultValue = "false") boolean throttle,
-        @RequestParam(name = "year", required = false) Integer year,
-        @RequestParam(name = "month", required = false) Integer month,
-        @RequestParam(name = "tag", required = false) String tagSlug,
-        Locale locale, Model model) {
+        @ModelAttribute("filters") PostFilters filters, Locale locale,
+        Model model) {
         page = Math.max(0, page);
-
-        if (page > 0 && throttle) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                // Doesn't matter
-            }
-        }
-
-        if (month != null && year == null) {
+        if (filters.getMonth() != null && filters.getYear() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Month requires a year");
         }
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        TimeFilter timeFilter = createTimeFilter(year, month);
 
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
-            .findPreviews(pageable, timeFilter, tagSlug);
+            .findPreviews(pageable, filters);
         Map<Integer, List<ArchiveMonth>> sortedMonths = blogPostPreviewService
             .getArchiveMonths()
             .stream()
@@ -83,32 +64,10 @@ public class HomeController {
         model.addAttribute("posts", posts.getContent());
         model.addAttribute("hasNext", posts.hasNext());
         model.addAttribute("nextPage", page + 1);
-        model.addAttribute("throttle", throttle);
-        model.addAttribute("selectedTagSlug", tagSlug);
         model
             .addAttribute("postDateFormatter",
                 POST_DATE_FORMATTER.withLocale(locale));
         return "index";
     }
 
-    private TimeFilter createTimeFilter(Integer year, Integer month) {
-        if (year == null && month == null) {
-            return null;
-        }
-
-        ZonedDateTime startDateTime = YearMonth
-            .of(year, month == null ? 1 : month)
-            .atDay(1)
-            .atStartOfDay(ZoneOffset.UTC);
-
-        ZonedDateTime endDateTime = month == null
-            ? startDateTime.plusYears(1)
-            : startDateTime.plusMonths(1);
-
-        return new TimeFilter(startDateTime.toInstant(),
-            endDateTime.toInstant());
-    }
-
-    public static record TimeFilter(Instant startTime, Instant endTime) {
-    }
 }

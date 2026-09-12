@@ -6,8 +6,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import dev.sirnik.blog.models.filters.PostFilters;
 import dev.sirnik.blog.models.projections.TagLink;
 import dev.sirnik.blog.repositories.TagRepository;
 
@@ -24,21 +26,19 @@ public class TagsController {
     @GetMapping("/tags")
     public String getTags(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "query", defaultValue = "") String filterQuery,
-        @RequestParam(name = "tag", required = false) String tagSlug,
-        Model model) {
+        @RequestParam(name = "tagQuery", defaultValue = "") String tagQuery,
+        @ModelAttribute("filters") PostFilters filters, Model model) {
         page = Math.max(0, page);
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
 
-        Slice<TagLink> tags = tagRepo.findTagLinks(filterQuery, pageable);
+        Slice<TagLink> tags = tagRepo.findTagLinks(tagQuery, pageable);
 
         model.addAttribute("tags", tags.getContent());
         model.addAttribute("hasNextTagPage", tags.hasNext());
         model.addAttribute("hasPreviousTagPage", tags.hasPrevious());
         model.addAttribute("tagPage", page);
-        model.addAttribute("query", filterQuery);
-        model.addAttribute("selectedTagSlug", tagSlug);
+        model.addAttribute("tagQuery", tagQuery);
         return "partials/tag-list";
     }
 }
