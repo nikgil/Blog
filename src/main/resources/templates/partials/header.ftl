@@ -1,4 +1,4 @@
-<#macro render hrefTarget="/" filters={}>
+<#macro render hrefTarget="/" filters={} partialSearch=false>
     <#local currentQuery=(filters.query)!"">
     <#local currentTag=(filters.tag)!"">
     <#local currentYear=(filters.year)!"">
@@ -16,9 +16,12 @@
         </div>
 
         <nav class="site-nav" aria-label="Primary navigation">
-            <form id="post-filters" class="site-search" action="/" method="get" hx-get="/" role="search"
-                hx-target="#archive-layout" hx-select="#archive-layout" hx-swap="outerHTML"
-                hx-trigger="submit, input changed delay:750ms" hx-replace-url="true">
+            <form id="post-filters" class="site-search" action="/" method="get" role="search"
+                <#if partialSearch>
+                hx-get="/" hx-target="#blog-content" hx-swap="outerHTML"
+                hx-trigger="submit, input changed delay:750ms" hx-replace-url="true"
+                hx-include="#tag-filter-query, #tag-page-state" hx-sync="this:replace"
+                </#if>>
                 <label class="is-sr-only" for="site-search-query">Search the blog</label>
                 <input class="site-search__input" id="site-search-query" name="query" type="search" placeholder="Search"
                     autocomplete="off" value="${currentQuery?html}">

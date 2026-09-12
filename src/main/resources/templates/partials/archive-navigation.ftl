@@ -1,7 +1,13 @@
+<#assign currentQuery=(filters.query)!"">
+<#assign currentTag=(filters.tag)!"">
+<#assign currentYear=(filters.year)!"">
+<#assign currentMonth=(filters.month)!"">
 <#assign monthNames=[ "January" , "February" , "March" , "April" , "May" , "June" , "July" , "August" , "September"
   , "October" , "November" , "December" ]>
 
-  <nav id="archive-navigation" class="archive-nav" aria-label="Post archive">
+  <nav id="archive-navigation" class="archive-nav" aria-label="Post archive"
+    hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML" hx-sync="#post-filters:replace"
+    hx-include="#tag-filter-query, #tag-page-state">
     <p class="archive-nav__title">Archive</p>
     <ol id="archive-years" class="archive-nav__years">
       <#list archiveMonths!{} as year, valueList>

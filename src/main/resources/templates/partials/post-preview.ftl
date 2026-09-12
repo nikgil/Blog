@@ -7,7 +7,8 @@
         hx-trigger="revealed"
         hx-swap="afterend"
         hx-get="/?page=${nextPage}<#if currentYear?has_content>&amp;year=${currentYear?c}</#if><#if currentMonth?has_content>&amp;month=${currentMonth?c}</#if><#if currentTag?has_content>&amp;tag=${currentTag?url('UTF-8')}</#if><#if currentQuery?has_content>&amp;query=${currentQuery?url('UTF-8')}</#if>"
-        hx-select="#blogs > .post-preview"
+        hx-target="this"
+        hx-sync="#post-filters:abort"
         </#if>
         >
         <a class="post-preview__link" href="/posts/${post.slug}" preload-images="true" preload>

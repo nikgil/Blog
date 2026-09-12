@@ -13,17 +13,18 @@ import dev.sirnik.blog.models.filters.PostFilters;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class HomeController {
+public class PostListController {
 
     private final BlogPageModel blogPageModel;
 
-    public HomeController(BlogPageModel blogPageModel) {
+    public PostListController(BlogPageModel blogPageModel) {
         this.blogPageModel = blogPageModel;
     }
 
-    // The more specific header mapping in PostListController handles fragments.
-    @GetMapping("/")
-    public String home(
+    // History cache misses need the full page from HomeController.
+    @GetMapping(value = "/", headers = {"HX-Request=true",
+        "HX-History-Restore-Request!=true"})
+    public String posts(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "tagPage", defaultValue = "0") int tagPage,
         @RequestParam(name = "tagQuery", defaultValue = "") String tagQuery,
@@ -33,7 +34,11 @@ public class HomeController {
             .addHeader(HttpHeaders.VARY,
                 "HX-Request, HX-History-Restore-Request");
         blogPageModel.addPosts(page, filters, locale, model);
+
+        if (page > 0) {
+            return "partials/post-items";
+        }
         blogPageModel.addSidebar(tagPage, tagQuery, model);
-        return "index";
+        return "partials/blog-content";
     }
 }
