@@ -3,11 +3,12 @@
 
 <head>
     <#import "partials/head.ftl" as head>
-        <@head.render title=(post.title + " | sirnik.Dev" ) stylesheet="post" />
-        <#import "partials/header.ftl" as header>
-            <script src="/js/post.js" defer></script>
+    <#import "partials/header.ftl" as header>
+    <@head.render title=(post.title + " | sirnik.Dev") stylesheet="post" />
+    <script src="/js/post.js" defer></script>
 </head>
 
+<#-- Enable preloading for the previous and next post links marked below. -->
 <body hx-ext="preload">
     <section class="section">
         <div class="container post-page">
@@ -47,13 +48,13 @@
 
                     <div class="post__body content">
                         <#-- Post content is trusted author HTML stored by the application. -->
-                            ${post.content}
+                        ${post.content}
                     </div>
                 </article>
 
                 <nav class="post-navigation" aria-label="Post navigation">
                     <#if olderPost??>
-                        <a class="post-navigation__link post-navigation__link--older" href="/posts/${olderPost.slug}"
+                        <a class="post-navigation__link" href="/posts/${olderPost.slug}"
                             preload="mouseover">
                             <span class="post-navigation__label">← Previous post</span>
                             <span class="post-navigation__title">${olderPost.title}</span>

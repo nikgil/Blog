@@ -113,7 +113,8 @@
     background-color: var(--bulma-scheme-main-bis, #fafafa);
 }
 
-.post-code__toggle:focus-visible {
+.post-code__toggle:focus-visible,
+.post-navigation__link:focus-visible {
     outline: 2px solid var(--bulma-focus, #485fc7);
     outline-offset: 2px;
 }
@@ -144,11 +145,6 @@
     background-color: var(--bulma-scheme-main-bis, #fafafa);
     border-color: var(--bulma-border, #b5b5b5);
     color: inherit;
-}
-
-.post-navigation__link:focus-visible {
-    outline: 2px solid var(--bulma-focus, #485fc7);
-    outline-offset: 2px;
 }
 
 .post-navigation__link--home {

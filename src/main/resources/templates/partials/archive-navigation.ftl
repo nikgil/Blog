@@ -5,6 +5,7 @@
 <#assign monthNames=[ "January" , "February" , "March" , "April" , "May" , "June" , "July" , "August" , "September"
   , "October" , "November" , "December" ]>
 
+  <#-- Boost date links to replace blog content without scrolling, carry tag search/page state, and cancel older filter requests. -->
   <nav id="archive-navigation" class="archive-nav" aria-label="Post archive"
     hx-boost="true" hx-target="#blog-content" hx-swap="outerHTML show:none" hx-sync="#post-filters:replace"
     hx-include="#tag-filter-query, #tag-page-state">
