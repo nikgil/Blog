@@ -13,6 +13,7 @@
   <div id="archive-layout" class="archive-layout">
     <aside class="archive-sidebar">
       <#include "archive-navigation.ftl">
+      <#-- Search tags after a typing pause or submit, replace only tag results, and queue the latest request behind any active post filter request. -->
       <form id="tag-filter" class="tag-filter" action="/tags" method="get" aria-labelledby="tag-filter-title"
         hx-get="/tags" hx-trigger="submit, input changed delay:500ms"
         hx-target="#tag-filter-results" hx-swap="innerHTML" hx-sync="#post-filters:queue last">

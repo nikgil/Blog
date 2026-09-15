@@ -1,3 +1,35 @@
+/* Warm paper and brown ink for light mode; dark mode keeps Bulma's existing palette. */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bulma-scheme-h: 42deg;
+        --bulma-scheme-s: 45%;
+        --bulma-scheme-main-l: 93%;
+        --bulma-scheme-main-bis-l: 90%;
+        --bulma-scheme-main-ter-l: 86%;
+        --bulma-background-l: 90%;
+        --bulma-border-weak-l: 80%;
+        --bulma-border-l: 70%;
+
+        --bulma-text-h: 30deg;
+        --bulma-text-s: 18%;
+        --bulma-text-l: 25%;
+        --bulma-text-strong-l: 18%;
+        --bulma-text-weak-l: 38%;
+
+        --bulma-link-h: 30deg;
+        --bulma-link-s: 45%;
+        --bulma-link-l: 34%;
+        --bulma-link-on-scheme-l: 34%;
+        --bulma-link-invert-l: 96%;
+        --bulma-focus: var(--bulma-link);
+        --bulma-code: var(--bulma-link-text);
+    }
+
+    .input::placeholder {
+        color: var(--bulma-text-weak);
+    }
+}
+
 /* Shared site header */
 .site-header {
     align-items: flex-start;
@@ -87,6 +119,8 @@
 .site-search:hover .site-search__input,
 .site-search:focus-within .site-search__input {
     border-color: var(--bulma-border, #b5b5b5);
+    border-end-end-radius: 0;
+    border-start-end-radius: 0;
     opacity: 1;
     padding: 0.5rem 0.75rem;
     width: clamp(9rem, 16vw, 13rem);
@@ -111,12 +145,6 @@
     padding: 0;
     position: relative;
     width: 2.5rem;
-}
-
-.site-search:hover .site-search__input,
-.site-search:focus-within .site-search__input {
-    border-end-end-radius: 0;
-    border-start-end-radius: 0;
 }
 
 .site-search:hover .site-search__button,

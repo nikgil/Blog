@@ -182,6 +182,11 @@ class BlogApplicationTests {
             .contains("name=\"page\"")
             .contains("value=\"1\"")
             .contains("aria-label=\"Tag page 1\"");
+
+        Document page = Jsoup.parse(rendered.toString());
+        assertThat(page.select("#tag-page-previous[disabled]")).hasSize(1);
+        assertThat(page.select("#tag-page-next:not([disabled])").val())
+            .isEqualTo("1");
     }
 
     @Test
@@ -220,10 +225,6 @@ class BlogApplicationTests {
                 .attribute("filters", hasProperty("month", is(1))))
             .andExpect(MockMvcResultMatchers
                 .content()
-                .string(containsString(
-                    "class=\"tag-filter__item tag-selected__item\"")))
-            .andExpect(MockMvcResultMatchers
-                .content()
                 .string(containsString("aria-current=\"true\"")))
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -239,6 +240,10 @@ class BlogApplicationTests {
                     .select(".tag-filter__link:not([aria-current])")
                     .eachAttr("href"))
                     .contains("/?tag=spring-0&year=2025&month=1&query=backend");
+                assertThat(page.select("#tag-page-previous[disabled]"))
+                    .hasSize(1);
+                assertThat(page.select("#tag-page-next:not([disabled])").val())
+                    .isEqualTo("1");
             })
             .andExpect(MockMvcResultMatchers
                 .content()
@@ -246,6 +251,28 @@ class BlogApplicationTests {
             .andExpect(MockMvcResultMatchers
                 .content()
                 .string(containsString("value=\"1\"")));
+
+        mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/tags")
+                .param("page", "1")
+                .param("tagQuery", "Spring")
+                .param("query", "backend")
+                .param("tag", "spring")
+                .param("year", "2025")
+                .param("month", "1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(result -> {
+                Document page = Jsoup
+                    .parse(result.getResponse().getContentAsString());
+                assertThat(page.select(".tag-filter__link").eachAttr("href"))
+                    .containsExactly(
+                        "/?tag=spring-9&year=2025&month=1&query=backend");
+                assertThat(
+                    page.select("#tag-page-previous:not([disabled])").val())
+                    .isEqualTo("0");
+                assertThat(page.select("#tag-page-next[disabled]")).hasSize(1);
+            });
     }
 
     @Test

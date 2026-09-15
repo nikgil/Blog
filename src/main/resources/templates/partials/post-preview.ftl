@@ -3,6 +3,7 @@
     <#local currentTag=(filters.tag)!"">
     <#local currentYear=(filters.year)!"">
     <#local currentMonth=(filters.month)!"">
+    <#-- Enable link preloading; when the last preview becomes visible, append the next filtered page and give new filter requests priority. -->
     <article class="post-preview" hx-ext="preload" <#if shouldLoadMore>
         hx-trigger="revealed"
         hx-swap="afterend"

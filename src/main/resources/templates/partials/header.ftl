@@ -13,6 +13,7 @@
         </div>
 
         <nav class="site-nav" aria-label="Primary navigation">
+            <#-- On the index, debounce search and replace blog content plus the URL, preserving this input and sidebar filters while cancelling older requests. -->
             <form id="post-filters" class="site-search" action="/" method="get" role="search"
                 <#if partialSearch>
                 hx-get="/" hx-target="#blog-content" hx-swap="outerHTML"
