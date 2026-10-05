@@ -457,6 +457,50 @@ class BlogApplicationTests {
     }
 
     @Test
+    void loginTemplateRendersFormErrorAndCsrfToken() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("error", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/login][method=post]"))
+            .hasSize(1);
+        assertThat(document.select("label[for=login-username]")).hasSize(1);
+        assertThat(document.select("input#login-username[name=username]"))
+            .hasSize(1);
+        assertThat(document.select("input#login-password[name=password]"))
+            .hasSize(1);
+        assertThat(document.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+        assertThat(document.select("p.help.is-danger#login-error").text())
+            .contains("Invalid username or password");
+        assertThat(document.select("input.input.is-danger[aria-invalid=true]"))
+            .hasSize(2);
+        assertThat(document.select("input[aria-describedby=login-error]"))
+            .hasSize(2);
+        assertThat(rendered.toString()).contains("href=\"/css/login.css\"");
+    }
+
+    @Test
+    void loginTemplateRendersWithoutErrorOrToken() throws Exception {
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(new HashMap<String, Object>(), rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select(".help.is-danger, .input.is-danger"))
+            .isEmpty();
+        assertThat(document.select("[aria-invalid]")).isEmpty();
+        assertThat(document.select("input[type=hidden]")).isEmpty();
+    }
+
+    @Test
     void homeRendersOrderedPostPreviewsAndNextSliceTrigger() throws Exception {
         Tag zulu = tagRepository.save(new Tag("Zulu", "zulu"));
         Tag alpha = tagRepository.save(new Tag("Alpha", "alpha"));

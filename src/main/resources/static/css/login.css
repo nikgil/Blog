@@ -1,0 +1,29 @@
+/* Full-height login page layout */
+.login-page {
+    min-height: 100vh;
+}
+
+.login-page__main {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: clamp(20rem, 55vh, 36rem);
+    padding-block: 2rem;
+}
+
+/* Matches the error card so the standalone pages share one look */
+.login-page__card.box {
+    background: linear-gradient(145deg,
+            var(--bulma-scheme-main-bis, #fafafa),
+            var(--bulma-scheme-main, #ffffff));
+    border: 1px solid var(--bulma-border-weak, #dbdbdb);
+    max-width: 26rem;
+    padding: clamp(1.5rem, 6vw, 2.5rem);
+    width: 100%;
+}
+
+.login-page__card .input:focus-visible {
+    border-color: var(--bulma-focus, #485fc7);
+    box-shadow: 0 0 0 0.125em color-mix(in srgb, var(--bulma-focus, #485fc7) 25%, transparent);
+    outline: none;
+}
