@@ -20,6 +20,7 @@ public class WebSecurityConfig {
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
                 .failureUrl("/login?error=true")
+                .defaultSuccessUrl("/login?success=true", true)
                 .permitAll())
             .logout(logout -> logout
                 .logoutUrl("/logout")

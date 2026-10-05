@@ -487,6 +487,107 @@ class BlogApplicationTests {
     }
 
     @Test
+    void loginTemplateShowsOnlyLogoutWhenLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+        model.put("success", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/logout][method=post]"))
+            .hasSize(1);
+        assertThat(document.select("form[action=/logout] button[type=submit]"))
+            .hasSize(1);
+        assertThat(document.select("form[action=/logout] button").text())
+            .isEqualTo("Log out");
+        assertThat(document
+            .select("form[action=/logout] input[name=_csrf]")
+            .attr("value")).isEqualTo("abc123");
+        assertThat(document.select("form[action=/login]")).isEmpty();
+        assertThat(
+            document.select("input[name=username], input[name=password]"))
+            .isEmpty();
+        assertThat(document
+            .select(".toast-region .toast.is-success[role=status]")
+            .text()).contains("You are logged in");
+        assertThat(document.select(".login-page__card .notification"))
+            .isEmpty();
+    }
+
+    @Test
+    void loginTemplateShowsPreviousLoginTimeWhenLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+        model.put("previousLogin", "2026-10-04 09:30 UTC");
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("#previous-login").text())
+            .isEqualTo("Last login: 2026-10-04 09:30 UTC");
+    }
+
+    @Test
+    void loginTemplateSaysFirstLoginWhenThereIsNoPreviousLogin()
+        throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("#previous-login").text())
+            .isEqualTo("This is your first login");
+    }
+
+    @Test
+    void loginTemplateOmitsSuccessNoticeWhenAlreadyLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/logout]")).hasSize(1);
+        assertThat(document.select(".notification.is-success")).isEmpty();
+    }
+
+    @Test
+    void loginTemplateShowsLogoutNoticeAndFormAfterLoggingOut()
+        throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("logout", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(
+            document.select(".toast-region .toast.is-info[role=status]").text())
+            .contains("You have been logged out");
+        assertThat(document.select(".login-page__card .notification"))
+            .isEmpty();
+        assertThat(document.select("form[action=/login]")).hasSize(1);
+        assertThat(document.select("form[action=/logout]")).isEmpty();
+    }
+
+    @Test
     void loginTemplateRendersWithoutErrorOrToken() throws Exception {
         StringWriter rendered = new StringWriter();
         freeMarkerConfiguration

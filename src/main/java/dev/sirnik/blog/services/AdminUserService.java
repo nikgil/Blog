@@ -1,5 +1,10 @@
 package dev.sirnik.blog.services;
 
+import java.util.Optional;
+
+import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,5 +42,28 @@ public class AdminUserService implements UserDetailsService {
             .password(adminUser.getPasswordHash())
             .roles("ADMIN")
             .build();
+    }
+
+    @Transactional
+    @EventListener
+    public void updateTimeStamps(AuthenticationSuccessEvent event) {
+        Authentication auth = event.getAuthentication();
+
+        if (auth == null) {
+            return;
+        }
+
+        Optional<AdminUser> userOpt = adminUserRepository
+            .findByUsername(auth.getName());
+
+        if (!userOpt.isPresent()) {
+            return;
+        }
+
+        AdminUser user = userOpt.get();
+
+        user.updateTimeStampsToNow();
+
+        adminUserRepository.save(user);
     }
 }

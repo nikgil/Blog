@@ -26,8 +26,11 @@ public class AdminUser {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "last_login_at")
-    private Instant lastLoginAt;
+    @Column(name = "current_login_at")
+    private Instant currentLoginAt;
+
+    @Column(name = "prev_login_at")
+    private Instant prevLoginAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -63,15 +66,24 @@ public class AdminUser {
         this.passwordHash = passwordHash;
     }
 
-    public Instant getLastLoginAt() {
-        return lastLoginAt;
+    public Instant getCurrentLoginAt() {
+        return currentLoginAt;
     }
 
-    public void setLastLoginAt(Instant lastLoginAt) {
-        this.lastLoginAt = lastLoginAt;
+    public Instant getPrevLoginAt() {
+        return prevLoginAt;
+    }
+
+    public void updateTimeStampsToNow() {
+        prevLoginAt = currentLoginAt;
+        currentLoginAt = currentTimestamp();
     }
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    private static Instant currentTimestamp() {
+        return Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 }

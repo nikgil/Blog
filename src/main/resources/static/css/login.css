@@ -27,3 +27,62 @@
     box-shadow: 0 0 0 0.125em color-mix(in srgb, var(--bulma-focus, #485fc7) 25%, transparent);
     outline: none;
 }
+
+/* Bottom-left status toasts: fixed to the viewport, click-through, and faded
+   out by CSS alone so no JavaScript is needed. */
+.toast-region {
+    bottom: 1rem;
+    left: 1rem;
+    max-width: min(22rem, calc(100vw - 2rem));
+    pointer-events: none;
+    position: fixed;
+    z-index: 40;
+}
+
+.toast.notification {
+    animation: toast-life 6s ease-in-out forwards;
+    box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 25%);
+    margin: 0;
+}
+
+/* Ends hidden so a faded toast cannot cover anything or be tabbed to. */
+@keyframes toast-life {
+    0% {
+        opacity: 0;
+        transform: translateY(0.75rem);
+        visibility: visible;
+    }
+
+    8%,
+    85% {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(0);
+        visibility: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast.notification {
+        animation-name: toast-life-reduced;
+    }
+
+    @keyframes toast-life-reduced {
+
+        0%,
+        85% {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        100% {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+}

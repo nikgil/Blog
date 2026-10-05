@@ -34,3 +34,6 @@ build/
 !.vscode/extensions.json
 !.vscode/java-formatter.xml
 !.vscode/settings.json
+
+### Local secrets ###
+.env
