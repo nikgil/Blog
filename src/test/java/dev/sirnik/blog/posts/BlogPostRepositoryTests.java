@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
 import dev.sirnik.blog.models.projections.BlogPostLink;
+import dev.sirnik.blog.repositories.BlogPostPredicates;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 import jakarta.persistence.Persistence;
@@ -46,7 +47,9 @@ class BlogPostRepositoryTests {
         entityManager.clear();
 
         BlogPost reloadedPost = blogPostRepository
-            .findBySlugAndPublishedTrue("setting-up-the-blog")
+            .findOne(BlogPostPredicates
+                .hasSlug("setting-up-the-blog")
+                .and(BlogPostPredicates.isPublished()))
             .orElseThrow();
 
         assertThat(postId).isNotNull();
@@ -111,6 +114,38 @@ class BlogPostRepositoryTests {
         assertThat(reloadedJava.getBlogPosts())
             .extracting(BlogPost::getId)
             .contains(postId);
+    }
+
+    @Test
+    void findOneBySlugPredicateIncludesDraftsAndLoadsTags() {
+        Tag spring = tagRepository.save(new Tag("Spring", "spring"));
+        BlogPost draft = new BlogPost("Draft", "a-draft", "Not public yet.");
+        draft.addTag(spring);
+        blogPostRepository.saveAndFlush(draft);
+        entityManager.clear();
+
+        BlogPost reloaded = blogPostRepository
+            .findOne(BlogPostPredicates.hasSlug("a-draft"))
+            .orElseThrow();
+
+        assertThat(reloaded.isPublished()).isFalse();
+        assertThat(Persistence.getPersistenceUtil().isLoaded(reloaded, "tags"))
+            .isTrue();
+        assertThat(reloaded.getTags())
+            .extracting(Tag::getSlug)
+            .containsExactly("spring");
+    }
+
+    @Test
+    void unknownOrBlankSlugFindsNothingInsteadOfEveryPost() {
+        savePost("First", "first", true);
+        savePost("Second", "second", true);
+
+        assertThat(
+            blogPostRepository.findOne(BlogPostPredicates.hasSlug("missing")))
+            .isEmpty();
+        assertThat(blogPostRepository.findOne(BlogPostPredicates.hasSlug("")))
+            .isEmpty();
     }
 
     private BlogPost savePost(String title, String slug, boolean published) {

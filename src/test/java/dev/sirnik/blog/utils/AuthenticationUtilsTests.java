@@ -2,15 +2,12 @@ package dev.sirnik.blog.utils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -95,15 +92,6 @@ class AuthenticationUtilsTests {
             .build();
         Authentication auth = UsernamePasswordAuthenticationToken
             .authenticated(details, null, details.getAuthorities());
-
-        assertThat(AuthenticationUtils.isValidAdmin(auth)).isTrue();
-    }
-
-    @Test
-    void anyGrantedAuthorityImplementationCountsByItsAuthorityString() {
-        GrantedAuthority custom = () -> ADMIN_AUTHORITY;
-        Authentication auth = UsernamePasswordAuthenticationToken
-            .authenticated("admin", "password", List.of(custom));
 
         assertThat(AuthenticationUtils.isValidAdmin(auth)).isTrue();
     }

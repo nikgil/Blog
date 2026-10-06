@@ -16,12 +16,11 @@ public class WebSecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
-            .authorizeHttpRequests(
-                requests -> requests
-                    .requestMatchers("/posts/*/publish")
-                    .hasRole(AuthenticationUtils.ADMIN_ROLE.getAuthority())
-                    .requestMatchers("/**")
-                    .permitAll())
+            .authorizeHttpRequests(requests -> requests
+                .requestMatchers("/posts/*/publish")
+                .hasRole(AuthenticationUtils.ADMIN_ROLE.getAuthority())
+                .requestMatchers("/**")
+                .permitAll())
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")

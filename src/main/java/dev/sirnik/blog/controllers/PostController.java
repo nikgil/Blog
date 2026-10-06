@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.projections.BlogPostLink;
 import dev.sirnik.blog.repositories.BlogPostRepository;
+import dev.sirnik.blog.services.BlogPostService;
 import dev.sirnik.blog.utils.AuthenticationUtils;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -32,17 +35,20 @@ public class PostController {
         .withZone(ZoneOffset.UTC);
 
     private final BlogPostRepository postRepository;
+    private final BlogPostService blogPostService;
 
-    public PostController(BlogPostRepository postRepository) {
+    public PostController(BlogPostRepository postRepository,
+        BlogPostService blogPostService) {
         this.postRepository = postRepository;
+        this.blogPostService = blogPostService;
     }
 
     @GetMapping("/{slug}")
     public String individualPost(@PathVariable String slug, Locale locale,
         Model model, HttpServletResponse response,
         Authentication authentication) {
-        Optional<BlogPost> post = postRepository
-            .findBySlugAndPublishedTrue(slug);
+        Optional<BlogPost> post = blogPostService
+            .findBySlug(slug, authentication);
         if (post.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return "error/404";
@@ -79,28 +85,19 @@ public class PostController {
     }
 
     @PostMapping("/{slug}/publish")
-    public String togglePublish(
-        @PathVariable String slug,
-        Authentication authentication,
-        HttpServletResponse response,
-        Model model) {
-        // TODO: add proper errors for loading
+    public String togglePublish(@PathVariable String slug,
+        Authentication authentication, Model model) {
+        // WebSecurityConfig already limits this route to admins; this keeps
+        // the handler safe if that rule is ever loosened or bypassed.
         if (!AuthenticationUtils.isValidAdmin(authentication)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        } else {
-            Optional<BlogPost> post = postRepository
-                .findBySlug(slug);
-
-            if (post.isPresent()) {
-                BlogPost postObj = post.get();
-                postObj.setPublished(!postObj.isPublished());
-                model.addAttribute("post", postObj);
-
-                postRepository.save(postObj);
-            } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            }
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
+
+        BlogPost post = blogPostService
+            .togglePublished(slug)
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        model.addAttribute("post", post);
 
         return "partials/publish-toggle";
     }

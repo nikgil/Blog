@@ -10,8 +10,7 @@ public class AuthenticationUtils {
         "ADMIN");
 
     private static final GrantedAuthority ADMIN_ROLE_FOR_CHECK = new SimpleGrantedAuthority(
-        "ROLE_"
-            + ADMIN_ROLE.getAuthority());
+        "ROLE_" + ADMIN_ROLE.getAuthority());
 
     private AuthenticationUtils() {
     }

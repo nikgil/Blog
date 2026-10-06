@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,14 +44,14 @@ public class BlogPageModel {
     }
 
     public void addPosts(int page, PostFilters filters, Locale locale,
-        Model model) {
+        Authentication auth, Model model) {
         if (filters.getMonth() != null && filters.getYear() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Month requires a year");
         }
         page = Math.max(0, page);
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
-            .findPreviews(PageRequest.of(page, PAGE_SIZE), filters);
+            .findPreviews(PageRequest.of(page, PAGE_SIZE), filters, auth);
         model.addAttribute("posts", posts.getContent());
         model.addAttribute("hasNext", posts.hasNext());
         model.addAttribute("nextPage", page + 1);
@@ -59,9 +60,10 @@ public class BlogPageModel {
                 POST_DATE_FORMATTER.withLocale(locale));
     }
 
-    public void addSidebar(TagFilters tagFilters, Model model) {
+    public void addSidebar(TagFilters tagFilters, Authentication auth,
+        Model model) {
         Map<Integer, List<ArchiveMonth>> archiveMonths = blogPostPreviewService
-            .getArchiveMonths()
+            .getArchiveMonths(auth)
             .stream()
             .collect(Collectors
                 .groupingBy(ArchiveMonth::getYear, LinkedHashMap::new,

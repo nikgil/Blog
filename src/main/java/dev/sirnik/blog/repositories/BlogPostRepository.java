@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -15,14 +16,14 @@ import dev.sirnik.blog.models.projections.BlogPostLink;
 
 public interface BlogPostRepository
     extends
-    JpaRepository<BlogPost, Long>,
-    JpaSpecificationExecutor<BlogPost> {
+        JpaRepository<BlogPost, Long>,
+        JpaSpecificationExecutor<BlogPost> {
 
+    // findOne(PredicateSpecification) is a default method that delegates to
+    // this one, so the entity graph applies to every predicate-based lookup.
+    @Override
     @EntityGraph(attributePaths = "tags")
-    Optional<BlogPost> findBySlug(String slug);
-
-    @EntityGraph(attributePaths = "tags")
-    Optional<BlogPost> findBySlugAndPublishedTrue(String slug);
+    Optional<BlogPost> findOne(Specification<BlogPost> spec);
 
     boolean existsBySlug(String slug);
 
@@ -58,11 +59,11 @@ public interface BlogPostRepository
                 month(p.createdAt) AS month,
                 COUNT(*) AS postCount
         FROM BlogPost p
-        WHERE p.published = true
+        WHERE (:includeDrafts = true OR p.published = true)
         GROUP BY
                 year(p.createdAt),
                 month(p.createdAt)
         ORDER BY year DESC, month DESC
                                 """)
-    List<ArchiveMonth> findAllBlogPostsMonths();
+    List<ArchiveMonth> findAllBlogPostsMonths(boolean includeDrafts);
 }

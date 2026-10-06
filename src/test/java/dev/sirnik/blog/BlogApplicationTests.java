@@ -487,7 +487,7 @@ class BlogApplicationTests {
             .isEqualTo("Publish");
         assertThat(form.select("input[name=published]").attr("value"))
             .isEqualTo("true");
-        assertThat(form.select(".tag").text()).isEqualTo("Draft");
+        assertThat(form.select(".tag").text()).isEqualTo("Unpublished");
     }
 
     @Test
@@ -512,6 +512,10 @@ class BlogApplicationTests {
             .hasSize(1);
         assertThat(adminPage.select("form.post__admin input[name=_csrf]"))
             .hasSize(1);
+        assertThat(adminPage.select("#publish-toggle-span")).hasSize(1);
+        assertThat(
+            adminPage.select("#publish-toggle-span > form#publish-toggle"))
+            .hasSize(1);
 
         String asVisitor = mockMvc
             .perform(MockMvcRequestBuilders.get("/posts/toggle-post"))
@@ -523,7 +527,8 @@ class BlogApplicationTests {
     }
 
     @Test
-    void publishToggleFragmentRendersAloneAsTheSwapTarget() throws Exception {
+    void publishToggleFragmentIsASingleSwapTargetWrappingTheForm()
+        throws Exception {
         BlogPost post = new BlogPost("Toggle post", "toggle-post",
             "<p>Body.</p>");
         post.setPublished(true);
@@ -541,12 +546,22 @@ class BlogApplicationTests {
         Document document = Jsoup.parse(rendered.toString());
         assertThat(rendered.toString()).doesNotContain("<html");
         assertThat(document.body().children()).hasSize(1);
-        Element form = document.body().child(0);
-        assertThat(form.id()).isEqualTo("publish-toggle");
+        Element swapTarget = document.body().child(0);
+        assertThat(swapTarget.id()).isEqualTo("publish-toggle-span");
+        assertThat(document.select("#publish-toggle-span")).hasSize(1);
+
+        Element form = swapTarget.selectFirst("form#publish-toggle");
+        assertThat(form).isNotNull();
         assertThat(form.attr("action")).isEqualTo("/posts/toggle-post/publish");
         assertThat(form.select("button").text()).isEqualTo("Unpublish");
         assertThat(form.select("input[name=_csrf]").attr("value"))
             .isEqualTo("abc123");
+
+        // The response must replace the element hx-target points at (the
+        // fragment's own root); otherwise each toggle nests another wrapper.
+        assertThat(form.attr("hx-post")).isEqualTo(form.attr("action"));
+        assertThat(form.attr("hx-target")).isEqualTo("#" + swapTarget.id());
+        assertThat(form.attr("hx-swap")).isEqualTo("outerHTML");
     }
 
     @Test
@@ -571,6 +586,7 @@ class BlogApplicationTests {
 
         assertThat(document.select("form.post__admin")).isEmpty();
         assertThat(document.select("form[action$=/publish]")).isEmpty();
+        assertThat(document.select("#publish-toggle-span")).isEmpty();
     }
 
     private Document renderPostPage(String slug, boolean published,

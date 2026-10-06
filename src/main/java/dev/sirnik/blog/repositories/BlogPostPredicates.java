@@ -15,6 +15,12 @@ public final class BlogPostPredicates {
         return (post, builder) -> builder.isTrue(post.get("published"));
     }
 
+    // Unlike the optional filters below, a blank slug must never widen the
+    // lookup to "any post", so this does not fall back to unrestricted().
+    public static PredicateSpecification<BlogPost> hasSlug(String slug) {
+        return (post, builder) -> builder.equal(post.get("slug"), slug);
+    }
+
     public static PredicateSpecification<BlogPost> createdAtOrAfter(
         Instant startInclusive) {
         return (post, builder) -> builder

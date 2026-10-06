@@ -3,6 +3,7 @@ package dev.sirnik.blog.controllers;
 import java.util.Locale;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +29,12 @@ public class HomeController {
         @RequestParam(name = "page", defaultValue = "0") int page,
         @ModelAttribute("filters") PostFilters filters, Locale locale,
         @ModelAttribute("tagFilters") TagFilters tagFilters, Model model,
-        HttpServletResponse response) {
+        HttpServletResponse response, Authentication authentication) {
         response
             .addHeader(HttpHeaders.VARY,
                 "HX-Request, HX-History-Restore-Request");
-        blogPageModel.addPosts(page, filters, locale, model);
-        blogPageModel.addSidebar(tagFilters, model);
+        blogPageModel.addPosts(page, filters, locale, authentication, model);
+        blogPageModel.addSidebar(tagFilters, authentication, model);
         return "index";
     }
 }

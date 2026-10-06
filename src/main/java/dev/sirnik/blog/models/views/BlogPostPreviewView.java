@@ -13,6 +13,7 @@ public class BlogPostPreviewView {
     private final Instant createdAt;
     private final String slug;
     private final String title;
+    private final boolean isPublished;
     private final List<TagView> orderedTags;
 
     public BlogPostPreviewView(BlogPostPreview post,
@@ -22,6 +23,7 @@ public class BlogPostPreviewView {
         createdAt = post.getCreatedAt();
         slug = post.getSlug();
         title = post.getTitle();
+        isPublished = post.isPublished();
 
         orderedTags = orderedTagRows
             .stream()
@@ -51,5 +53,9 @@ public class BlogPostPreviewView {
 
     public List<TagView> getOrderedTags() {
         return orderedTags;
+    }
+
+    public boolean isPublished() {
+        return isPublished;
     }
 }
