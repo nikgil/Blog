@@ -18,5 +18,6 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
     @Query("select u.prevLoginAt from AdminUser u where u.username = :username")
     Optional<Instant> findPrevLoginAtByUsername(
-        @Param("username") String username);
+        @Param("username") String username
+    );
 }

@@ -35,8 +35,11 @@ public class AdminUserService implements UserDetailsService {
         throws UsernameNotFoundException {
         AdminUser adminUser = adminUserRepository
             .findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException(
-                "No admin user named " + username));
+            .orElseThrow(
+                () -> new UsernameNotFoundException(
+                    "No admin user named " + username
+                )
+            );
 
         return User
             .withUsername(adminUser.getUsername())

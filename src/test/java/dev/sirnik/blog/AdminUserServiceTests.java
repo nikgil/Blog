@@ -29,9 +29,11 @@ class AdminUserServiceTests {
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    AdminUserServiceTests(AdminUserRepository adminUserRepository,
+    AdminUserServiceTests(
+        AdminUserRepository adminUserRepository,
         AdminUserService adminUserService,
-        ApplicationEventPublisher eventPublisher) {
+        ApplicationEventPublisher eventPublisher
+    ) {
         this.adminUserRepository = adminUserRepository;
         this.adminUserService = adminUserService;
         this.eventPublisher = eventPublisher;
@@ -40,7 +42,12 @@ class AdminUserServiceTests {
     @Test
     void savedAdminUserLoadsWithHashAndAdminRole() {
         adminUserRepository
-            .saveAndFlush(new AdminUser("owner", "{bcrypt}hash"));
+            .saveAndFlush(
+                new AdminUser(
+                    "owner",
+                    "{bcrypt}hash"
+                )
+            );
 
         UserDetails details = adminUserService.loadUserByUsername("owner");
 
@@ -54,7 +61,12 @@ class AdminUserServiceTests {
     @Test
     void newAdminUserGetsCreatedAtAndNoLoginTimes() {
         AdminUser saved = adminUserRepository
-            .saveAndFlush(new AdminUser("owner", "{bcrypt}hash"));
+            .saveAndFlush(
+                new AdminUser(
+                    "owner",
+                    "{bcrypt}hash"
+                )
+            );
 
         assertThat(saved.getCreatedAt()).isNotNull();
         assertThat(saved.getCurrentLoginAt()).isNull();
@@ -64,7 +76,12 @@ class AdminUserServiceTests {
     @Test
     void successfulLoginEventRecordsTheLoginTime() {
         adminUserRepository
-            .saveAndFlush(new AdminUser("owner", "{bcrypt}hash"));
+            .saveAndFlush(
+                new AdminUser(
+                    "owner",
+                    "{bcrypt}hash"
+                )
+            );
 
         publishLoginSuccess("owner");
 
@@ -78,7 +95,12 @@ class AdminUserServiceTests {
     @Test
     void secondLoginMovesTheFirstOneIntoPreviousLogin() {
         adminUserRepository
-            .saveAndFlush(new AdminUser("owner", "{bcrypt}hash"));
+            .saveAndFlush(
+                new AdminUser(
+                    "owner",
+                    "{bcrypt}hash"
+                )
+            );
 
         publishLoginSuccess("owner");
         java.time.Instant firstLogin = adminUserRepository
@@ -103,9 +125,12 @@ class AdminUserServiceTests {
 
     private void publishLoginSuccess(String username) {
         eventPublisher
-            .publishEvent(new AuthenticationSuccessEvent(
-                UsernamePasswordAuthenticationToken
-                    .authenticated(username, null, java.util.List.of())));
+            .publishEvent(
+                new AuthenticationSuccessEvent(
+                    UsernamePasswordAuthenticationToken
+                        .authenticated(username, null, java.util.List.of())
+                )
+            );
     }
 
     @Test

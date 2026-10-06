@@ -55,7 +55,11 @@ public class BlogPost {
     protected BlogPost() {
     }
 
-    public BlogPost(String title, String slug, String content) {
+    public BlogPost(
+        String title,
+        String slug,
+        String content
+    ) {
         this.title = title;
         this.slug = slug;
         this.content = content;

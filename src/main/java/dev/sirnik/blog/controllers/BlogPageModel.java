@@ -37,17 +37,26 @@ public class BlogPageModel {
     private final BlogPostPreviewService blogPostPreviewService;
     private final TagRepository tagRepository;
 
-    public BlogPageModel(BlogPostPreviewService blogPostPreviewService,
-        TagRepository tagRepository) {
+    public BlogPageModel(
+        BlogPostPreviewService blogPostPreviewService,
+        TagRepository tagRepository
+    ) {
         this.blogPostPreviewService = blogPostPreviewService;
         this.tagRepository = tagRepository;
     }
 
-    public void addPosts(int page, PostFilters filters, Locale locale,
-        Authentication auth, Model model) {
+    public void addPosts(
+        int page,
+        PostFilters filters,
+        Locale locale,
+        Authentication auth,
+        Model model
+    ) {
         if (filters.getMonth() != null && filters.getYear() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Month requires a year");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Month requires a year"
+            );
         }
         page = Math.max(0, page);
         Slice<BlogPostPreviewView> posts = blogPostPreviewService
@@ -56,27 +65,37 @@ public class BlogPageModel {
         model.addAttribute("hasNext", posts.hasNext());
         model.addAttribute("nextPage", page + 1);
         model
-            .addAttribute("postDateFormatter",
-                POST_DATE_FORMATTER.withLocale(locale));
+            .addAttribute(
+                "postDateFormatter", POST_DATE_FORMATTER.withLocale(locale)
+            );
     }
 
-    public void addSidebar(TagFilters tagFilters, Authentication auth,
-        Model model) {
+    public void addSidebar(
+        TagFilters tagFilters,
+        Authentication auth,
+        Model model
+    ) {
         Map<Integer, List<ArchiveMonth>> archiveMonths = blogPostPreviewService
             .getArchiveMonths(auth)
             .stream()
-            .collect(Collectors
-                .groupingBy(ArchiveMonth::getYear, LinkedHashMap::new,
-                    Collectors.toList()));
+            .collect(
+                Collectors
+                    .groupingBy(
+                        ArchiveMonth::getYear, LinkedHashMap::new,
+                        Collectors.toList()
+                    )
+            );
         model.addAttribute("archiveMonths", archiveMonths);
 
         int tagPage = Math
-            .max(0,
-                tagFilters.getTagPage() == null ? 0 : tagFilters.getTagPage());
+            .max(
+                0, tagFilters.getTagPage() == null ? 0 : tagFilters.getTagPage()
+            );
         tagFilters.setTagPage(tagPage);
         Slice<TagLink> tags = tagRepository
-            .findTagLinks(tagFilters.getTagQuery(),
-                PageRequest.of(tagPage, PAGE_SIZE));
+            .findTagLinks(
+                tagFilters.getTagQuery(), PageRequest.of(tagPage, PAGE_SIZE)
+            );
         model.addAttribute("tagFilters", tagFilters);
         model.addAttribute("tags", tags.getContent());
         model.addAttribute("hasNextTagPage", tags.hasNext());

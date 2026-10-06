@@ -106,18 +106,28 @@ class AdminUserSeederTests {
         String hash = encoder.encode("secret");
 
         assertThatThrownBy(
-            () -> seeder("${BLOG_ADMIN_USERNAME}", hash).run(null))
+            () -> seeder("${BLOG_ADMIN_USERNAME}", hash).run(null)
+        )
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("BLOG_ADMIN_USERNAME");
         assertThatThrownBy(
-            () -> seeder("owner", "${BLOG_ADMIN_PASSWORD_HASH}").run(null))
+            () -> seeder("owner", "${BLOG_ADMIN_PASSWORD_HASH}").run(null)
+        )
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("BLOG_ADMIN_PASSWORD_HASH");
         assertThat(adminUserRepository.count()).isZero();
     }
 
-    private AdminUserSeeder seeder(String username, String passwordHash) {
-        return new AdminUserSeeder(adminUserRepository,
-            new AdminUserSeeder.AdminUserProperties(username, passwordHash));
+    private AdminUserSeeder seeder(
+        String username,
+        String passwordHash
+    ) {
+        return new AdminUserSeeder(
+            adminUserRepository,
+            new AdminUserSeeder.AdminUserProperties(
+                username,
+                passwordHash
+            )
+        );
     }
 }

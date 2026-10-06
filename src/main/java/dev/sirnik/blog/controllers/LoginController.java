@@ -25,10 +25,13 @@ public class LoginController {
     }
 
     @GetMapping("/login")
-    public String getLogin(@RequestParam(defaultValue = "false") boolean error,
+    public String getLogin(
+        @RequestParam(defaultValue = "false") boolean error,
         @RequestParam(defaultValue = "false") boolean logout,
-        @RequestParam(defaultValue = "false") boolean success, Model model,
-        Authentication authentication) {
+        @RequestParam(defaultValue = "false") boolean success,
+        Model model,
+        Authentication authentication
+    ) {
 
         model.addAttribute("error", error);
         model.addAttribute("logout", logout);

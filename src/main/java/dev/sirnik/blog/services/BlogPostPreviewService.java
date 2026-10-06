@@ -37,8 +37,10 @@ public class BlogPostPreviewService {
     private final BlogPostRepository blogPostRepository;
     private final TagRepository tagRepository;
 
-    public BlogPostPreviewService(BlogPostRepository blogPostRepository,
-        TagRepository tagRepository) {
+    public BlogPostPreviewService(
+        BlogPostRepository blogPostRepository,
+        TagRepository tagRepository
+    ) {
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
     }
@@ -56,8 +58,11 @@ public class BlogPostPreviewService {
      * will only get published.
      */
     @Transactional(readOnly = true)
-    public Slice<BlogPostPreviewView> findPreviews(Pageable pageable,
-        PostFilters filters, Authentication auth) {
+    public Slice<BlogPostPreviewView> findPreviews(
+        Pageable pageable,
+        PostFilters filters,
+        Authentication auth
+    ) {
         PredicateSpecification<BlogPost> predicate = BlogPostPredicates
             .hasTagSlug(filters.getTag())
             .and(BlogPostPredicates.contentContains(filters.getQuery()));
@@ -66,23 +71,25 @@ public class BlogPostPreviewService {
             predicate = predicate.and(BlogPostPredicates.isPublished());
         }
 
-        TimeFilter timeFilter = createTimeFilter(filters.getYear(),
-            filters.getMonth());
+        TimeFilter timeFilter = createTimeFilter(
+            filters.getYear(), filters.getMonth()
+        );
 
         if (timeFilter != null) {
             predicate = predicate
                 .and(
-                    BlogPostPredicates.createdAtOrAfter(timeFilter.startTime()))
+                    BlogPostPredicates.createdAtOrAfter(timeFilter.startTime())
+                )
                 .and(BlogPostPredicates.createdBefore(timeFilter.endTime()));
         }
 
         Pageable previewPageable = PageRequest
             .of(pageable.getPageNumber(), pageable.getPageSize(), PREVIEW_SORT);
         Slice<BlogPostPreview> postSlice = blogPostRepository
-            .findBy(predicate,
-                query -> query
-                    .as(BlogPostPreview.class)
-                    .slice(previewPageable));
+            .findBy(
+                predicate,
+                query -> query.as(BlogPostPreview.class).slice(previewPageable)
+            );
 
         List<Long> postIds = postSlice
             .getContent()
@@ -92,11 +99,19 @@ public class BlogPostPreviewService {
         Map<Long, List<BlogPostTagRow>> tagsByPostId = loadTags(postIds);
 
         return postSlice
-            .map(post -> new BlogPostPreviewView(post, tagsByPostId
-                .getOrDefault(post.getId(), Collections.emptyList())));
+            .map(
+                post -> new BlogPostPreviewView(
+                    post,
+                    tagsByPostId
+                        .getOrDefault(post.getId(), Collections.emptyList())
+                )
+            );
     }
 
-    private TimeFilter createTimeFilter(Integer year, Integer month) {
+    private TimeFilter createTimeFilter(
+        Integer year,
+        Integer month
+    ) {
         if (year == null) {
             return null;
         }
@@ -110,8 +125,10 @@ public class BlogPostPreviewService {
             ? startDateTime.plusYears(1)
             : startDateTime.plusMonths(1);
 
-        return new TimeFilter(startDateTime.toInstant(),
-            endDateTime.toInstant());
+        return new TimeFilter(
+            startDateTime.toInstant(),
+            endDateTime.toInstant()
+        );
     }
 
     private Map<Long, List<BlogPostTagRow>> loadTags(List<Long> postIds) {
@@ -122,8 +139,10 @@ public class BlogPostPreviewService {
         return tagRepository
             .findForPostIds(postIds)
             .stream()
-            .collect(Collectors
-                .groupingBy(BlogPostTagRow::getPostId, Collectors.toList()));
+            .collect(
+                Collectors
+                    .groupingBy(BlogPostTagRow::getPostId, Collectors.toList())
+            );
     }
 
     private record TimeFilter(Instant startTime, Instant endTime) {

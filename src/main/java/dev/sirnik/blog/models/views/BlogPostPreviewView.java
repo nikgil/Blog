@@ -16,8 +16,10 @@ public class BlogPostPreviewView {
     private final boolean isPublished;
     private final List<TagView> orderedTags;
 
-    public BlogPostPreviewView(BlogPostPreview post,
-        List<BlogPostTagRow> orderedTagRows) {
+    public BlogPostPreviewView(
+        BlogPostPreview post,
+        List<BlogPostTagRow> orderedTagRows
+    ) {
         id = post.getId();
         preview = post.getPreview();
         createdAt = post.getCreatedAt();
@@ -27,7 +29,12 @@ public class BlogPostPreviewView {
 
         orderedTags = orderedTagRows
             .stream()
-            .map(row -> new TagView(row.getName(), row.getSlug()))
+            .map(
+                row -> new TagView(
+                    row.getName(),
+                    row.getSlug()
+                )
+            )
             .toList();
     }
 

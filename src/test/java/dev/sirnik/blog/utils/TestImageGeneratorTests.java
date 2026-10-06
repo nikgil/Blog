@@ -25,9 +25,13 @@ class TestImageGeneratorTests {
         Path firstDirectory = temporaryDirectory.resolve("first");
         Path secondDirectory = temporaryDirectory.resolve("second");
         TestImageGenerator firstGenerator = new TestImageGenerator(
-            firstDirectory, "/test-images");
+            firstDirectory,
+            "/test-images"
+        );
         TestImageGenerator secondGenerator = new TestImageGenerator(
-            secondDirectory, "/test-images/");
+            secondDirectory,
+            "/test-images/"
+        );
 
         GeneratedTestImage first = firstGenerator.generate(42, 3);
         GeneratedTestImage second = secondGenerator.generate(42, 3);

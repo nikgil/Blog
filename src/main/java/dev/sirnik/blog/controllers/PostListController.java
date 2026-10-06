@@ -28,12 +28,17 @@ public class PostListController {
         "HX-History-Restore-Request!=true"})
     public String posts(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @ModelAttribute("filters") PostFilters filters, Locale locale,
-        @ModelAttribute("tagFilters") TagFilters tagFilters, Model model,
-        HttpServletResponse response, Authentication authentication) {
+        @ModelAttribute("filters") PostFilters filters,
+        Locale locale,
+        @ModelAttribute("tagFilters") TagFilters tagFilters,
+        Model model,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
         response
-            .addHeader(HttpHeaders.VARY,
-                "HX-Request, HX-History-Restore-Request");
+            .addHeader(
+                HttpHeaders.VARY, "HX-Request, HX-History-Restore-Request"
+            );
         blogPageModel.addPosts(page, filters, locale, authentication, model);
 
         if (page > 0) {

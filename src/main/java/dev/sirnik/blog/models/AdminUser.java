@@ -38,7 +38,10 @@ public class AdminUser {
     protected AdminUser() {
     }
 
-    public AdminUser(String username, String passwordHash) {
+    public AdminUser(
+        String username,
+        String passwordHash
+    ) {
         this.username = username;
         this.passwordHash = passwordHash;
     }

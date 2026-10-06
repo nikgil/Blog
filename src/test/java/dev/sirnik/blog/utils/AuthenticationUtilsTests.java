@@ -46,9 +46,11 @@ class AuthenticationUtilsTests {
 
     @Test
     void anonymousTokenIsNotAnAdmin() {
-        Authentication auth = new AnonymousAuthenticationToken("key",
+        Authentication auth = new AnonymousAuthenticationToken(
+            "key",
             "anonymousUser",
-            AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+            AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")
+        );
 
         // Anonymous tokens report isAuthenticated() == true, so only the
         // authority check keeps them out.
@@ -65,22 +67,27 @@ class AuthenticationUtilsTests {
     @Test
     void authenticatedUserWithOnlyTheUserRoleIsNotAnAdmin() {
         assertThat(
-            AuthenticationUtils.isValidAdmin(authenticatedWith("ROLE_USER")))
-            .isFalse();
+            AuthenticationUtils.isValidAdmin(authenticatedWith("ROLE_USER"))
+        ).isFalse();
     }
 
     @Test
     void authenticatedUserWithTheAdminRoleIsAnAdmin() {
-        assertThat(AuthenticationUtils
-            .isValidAdmin(authenticatedWith(ADMIN_AUTHORITY))).isTrue();
+        assertThat(
+            AuthenticationUtils.isValidAdmin(authenticatedWith(ADMIN_AUTHORITY))
+        ).isTrue();
     }
 
     @Test
     void adminRoleAmongOtherAuthoritiesIsStillAnAdmin() {
-        assertThat(AuthenticationUtils
-            .isValidAdmin(
-                authenticatedWith("ROLE_USER", ADMIN_AUTHORITY, "posts:write")))
-            .isTrue();
+        assertThat(
+            AuthenticationUtils
+                .isValidAdmin(
+                    authenticatedWith(
+                        "ROLE_USER", ADMIN_AUTHORITY, "posts:write"
+                    )
+                )
+        ).isTrue();
     }
 
     @Test
@@ -101,13 +108,15 @@ class AuthenticationUtilsTests {
         "ROLE_ADMINISTRATOR", "ROLE_SUPERADMIN", "ADMIN_VIEWER"})
     void lookalikeAuthoritiesAreNotAdmin(String authority) {
         assertThat(
-            AuthenticationUtils.isValidAdmin(authenticatedWith(authority)))
-            .isFalse();
+            AuthenticationUtils.isValidAdmin(authenticatedWith(authority))
+        ).isFalse();
     }
 
     private static Authentication authenticatedWith(String... authorities) {
         return UsernamePasswordAuthenticationToken
-            .authenticated("someone", "password",
-                AuthorityUtils.createAuthorityList(authorities));
+            .authenticated(
+                "someone", "password",
+                AuthorityUtils.createAuthorityList(authorities)
+            );
     }
 }

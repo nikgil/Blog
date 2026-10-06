@@ -37,16 +37,22 @@ public class PostController {
     private final BlogPostRepository postRepository;
     private final BlogPostService blogPostService;
 
-    public PostController(BlogPostRepository postRepository,
-        BlogPostService blogPostService) {
+    public PostController(
+        BlogPostRepository postRepository,
+        BlogPostService blogPostService
+    ) {
         this.postRepository = postRepository;
         this.blogPostService = blogPostService;
     }
 
     @GetMapping("/{slug}")
-    public String individualPost(@PathVariable String slug, Locale locale,
-        Model model, HttpServletResponse response,
-        Authentication authentication) {
+    public String individualPost(
+        @PathVariable String slug,
+        Locale locale,
+        Model model,
+        HttpServletResponse response,
+        Authentication authentication
+    ) {
         Optional<BlogPost> post = blogPostService
             .findBySlug(slug, authentication);
         if (post.isEmpty()) {
@@ -66,27 +72,33 @@ public class PostController {
         model.addAttribute("olderPost", olderPost);
         model.addAttribute("newerPost", newerPost);
         model
-            .addAttribute("postDateFormatter",
-                POST_DATE_FORMATTER.withLocale(locale));
+            .addAttribute(
+                "postDateFormatter", POST_DATE_FORMATTER.withLocale(locale)
+            );
 
         if (AuthenticationUtils.isValidAdmin(authentication)) {
             model.addAttribute("loggedIn", true);
         } else {
             // Force admins to see freshest data
             response
-                .setHeader(HttpHeaders.CACHE_CONTROL,
+                .setHeader(
+                    HttpHeaders.CACHE_CONTROL,
                     CacheControl
                         .maxAge(Duration.ofSeconds(60))
                         .cachePrivate()
-                        .getHeaderValue());
+                        .getHeaderValue()
+                );
         }
 
         return "post";
     }
 
     @PostMapping("/{slug}/publish")
-    public String togglePublish(@PathVariable String slug,
-        Authentication authentication, Model model) {
+    public String togglePublish(
+        @PathVariable String slug,
+        Authentication authentication,
+        Model model
+    ) {
         // WebSecurityConfig already limits this route to admins; this keeps
         // the handler safe if that rule is ever loosened or bypassed.
         if (!AuthenticationUtils.isValidAdmin(authentication)) {
@@ -96,7 +108,8 @@ public class PostController {
         BlogPost post = blogPostService
             .togglePublished(slug)
             .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
+            );
         model.addAttribute("post", post);
 
         return "partials/publish-toggle";

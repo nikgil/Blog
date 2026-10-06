@@ -7,10 +7,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class AuthenticationUtils {
 
     public static final GrantedAuthority ADMIN_ROLE = new SimpleGrantedAuthority(
-        "ADMIN");
+        "ADMIN"
+    );
 
     private static final GrantedAuthority ADMIN_ROLE_FOR_CHECK = new SimpleGrantedAuthority(
-        "ROLE_" + ADMIN_ROLE.getAuthority());
+        "ROLE_" + ADMIN_ROLE.getAuthority()
+    );
 
     private AuthenticationUtils() {
     }

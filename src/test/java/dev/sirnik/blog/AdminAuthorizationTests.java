@@ -88,11 +88,15 @@ class AdminAuthorizationTests {
     private final EntityManager entityManager;
 
     @Autowired
-    AdminAuthorizationTests(MockMvc mockMvc,
+    AdminAuthorizationTests(
+        MockMvc mockMvc,
         BlogPostRepository blogPostRepository,
         AdminUserRepository adminUserRepository,
-        AdminUserService adminUserService, PasswordEncoder passwordEncoder,
-        PostController postController, EntityManager entityManager) {
+        AdminUserService adminUserService,
+        PasswordEncoder passwordEncoder,
+        PostController postController,
+        EntityManager entityManager
+    ) {
         this.mockMvc = mockMvc;
         this.blogPostRepository = blogPostRepository;
         this.adminUserRepository = adminUserRepository;
@@ -121,10 +125,12 @@ class AdminAuthorizationTests {
         savePost(true);
 
         mockMvc
-            .perform(post(PUBLISH_URL)
-                .with(reader())
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post(PUBLISH_URL)
+                    .with(reader())
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isForbidden());
 
         assertStoredPublished(true);
@@ -137,11 +143,15 @@ class AdminAuthorizationTests {
         savePost(true);
 
         mockMvc
-            .perform(post(PUBLISH_URL)
-                .with(user("sneaky")
-                    .authorities(new SimpleGrantedAuthority(authority)))
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post(PUBLISH_URL)
+                    .with(
+                        user("sneaky")
+                            .authorities(new SimpleGrantedAuthority(authority))
+                    )
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isForbidden());
 
         assertStoredPublished(true);
@@ -154,7 +164,8 @@ class AdminAuthorizationTests {
 
         mockMvc
             .perform(
-                post(PUBLISH_URL).with(admin()).param("published", "false"))
+                post(PUBLISH_URL).with(admin()).param("published", "false")
+            )
             .andExpect(status().isForbidden());
 
         assertStoredPublished(true);
@@ -165,10 +176,12 @@ class AdminAuthorizationTests {
         savePost(true);
 
         mockMvc
-            .perform(post(PUBLISH_URL)
-                .with(admin())
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post(PUBLISH_URL)
+                    .with(admin())
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isOk())
             .andExpect(handler().handlerType(PostController.class))
             .andExpect(handler().methodName("togglePublish"))
@@ -181,10 +194,12 @@ class AdminAuthorizationTests {
         savePost(true);
 
         String afterUnpublish = mockMvc
-            .perform(post(PUBLISH_URL)
-                .with(admin())
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post(PUBLISH_URL)
+                    .with(admin())
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -194,10 +209,12 @@ class AdminAuthorizationTests {
         assertThat(toggleButtonLabel(afterUnpublish)).isEqualTo("Publish");
 
         String afterRepublish = mockMvc
-            .perform(post(PUBLISH_URL)
-                .with(admin())
-                .with(csrf())
-                .param("published", "true"))
+            .perform(
+                post(PUBLISH_URL)
+                    .with(admin())
+                    .with(csrf())
+                    .param("published", "true")
+            )
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -213,10 +230,12 @@ class AdminAuthorizationTests {
         savePost(true);
 
         mockMvc
-            .perform(post("/posts/no-such-post/publish")
-                .with(admin())
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post("/posts/no-such-post/publish")
+                    .with(admin())
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isNotFound());
 
         assertStoredPublished(true);
@@ -232,10 +251,13 @@ class AdminAuthorizationTests {
         ExtendedModelMap model = new ExtendedModelMap();
 
         assertThatThrownBy(
-            () -> postController.togglePublish(SLUG, null, model))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
+            () -> postController.togglePublish(SLUG, null, model)
+        )
+            .isInstanceOfSatisfying(
+                ResponseStatusException.class,
                 e -> assertThat(e.getStatusCode())
-                    .isEqualTo(HttpStatus.UNAUTHORIZED));
+                    .isEqualTo(HttpStatus.UNAUTHORIZED)
+            );
 
         assertThat(model.containsAttribute("post")).isFalse();
         assertStoredPublished(true);
@@ -246,11 +268,15 @@ class AdminAuthorizationTests {
         savePost(true);
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertThatThrownBy(() -> postController
-            .togglePublish(SLUG, authenticatedWith("ROLE_USER"), model))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
+        assertThatThrownBy(
+            () -> postController
+                .togglePublish(SLUG, authenticatedWith("ROLE_USER"), model)
+        )
+            .isInstanceOfSatisfying(
+                ResponseStatusException.class,
                 e -> assertThat(e.getStatusCode())
-                    .isEqualTo(HttpStatus.UNAUTHORIZED));
+                    .isEqualTo(HttpStatus.UNAUTHORIZED)
+            );
 
         assertThat(model.containsAttribute("post")).isFalse();
         assertStoredPublished(true);
@@ -274,12 +300,17 @@ class AdminAuthorizationTests {
         savePost(true);
         ExtendedModelMap model = new ExtendedModelMap();
 
-        assertThatThrownBy(() -> postController
-            .togglePublish("no-such-post", authenticatedWith("ROLE_ADMIN"),
-                model))
-            .isInstanceOfSatisfying(ResponseStatusException.class,
+        assertThatThrownBy(
+            () -> postController
+                .togglePublish(
+                    "no-such-post", authenticatedWith("ROLE_ADMIN"), model
+                )
+        )
+            .isInstanceOfSatisfying(
+                ResponseStatusException.class,
                 e -> assertThat(e.getStatusCode())
-                    .isEqualTo(HttpStatus.NOT_FOUND));
+                    .isEqualTo(HttpStatus.NOT_FOUND)
+            );
 
         assertThat(model.containsAttribute("post")).isFalse();
         assertStoredPublished(true);
@@ -334,8 +365,10 @@ class AdminAuthorizationTests {
         savePost(true);
 
         for (MockHttpServletRequestBuilder request : List
-            .of(get("/posts/" + SLUG), get("/posts/" + SLUG).with(reader()),
-                get("/posts/" + SLUG).with(admin()))) {
+            .of(
+                get("/posts/" + SLUG), get("/posts/" + SLUG).with(reader()),
+                get("/posts/" + SLUG).with(admin())
+            )) {
             String page = mockMvc
                 .perform(request)
                 .andExpect(status().isOk())
@@ -408,12 +441,14 @@ class AdminAuthorizationTests {
             .perform(get("/"))
             .andExpect(status().isOk())
             .andExpect(
-                model().attribute("posts", not(hasItem(draftPreview()))));
+                model().attribute("posts", not(hasItem(draftPreview())))
+            );
         mockMvc
             .perform(get("/").with(reader()))
             .andExpect(status().isOk())
             .andExpect(
-                model().attribute("posts", not(hasItem(draftPreview()))));
+                model().attribute("posts", not(hasItem(draftPreview())))
+            );
     }
 
     @Test
@@ -436,13 +471,15 @@ class AdminAuthorizationTests {
             .andExpect(status().isOk())
             .andExpect(handler().handlerType(PostListController.class))
             .andExpect(
-                model().attribute("posts", not(hasItem(draftPreview()))));
+                model().attribute("posts", not(hasItem(draftPreview())))
+            );
         mockMvc
             .perform(get("/").header("HX-Request", "true").with(reader()))
             .andExpect(status().isOk())
             .andExpect(handler().handlerType(PostListController.class))
             .andExpect(
-                model().attribute("posts", not(hasItem(draftPreview()))));
+                model().attribute("posts", not(hasItem(draftPreview())))
+            );
     }
 
     @Test
@@ -493,12 +530,14 @@ class AdminAuthorizationTests {
         for (MockHttpServletRequestBuilder request : List
             .of(get("/"), get("/").with(reader()))) {
             Document document = Jsoup
-                .parse(mockMvc
-                    .perform(request)
-                    .andExpect(status().isOk())
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString());
+                .parse(
+                    mockMvc
+                        .perform(request)
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString()
+                );
 
             assertThat(document.select("article.post-preview h2 .tag"))
                 .isEmpty();
@@ -514,11 +553,11 @@ class AdminAuthorizationTests {
         assertThat(archivedPosts(mockMvc.perform(get("/")).andReturn()))
             .isEqualTo(1);
         assertThat(
-            archivedPosts(mockMvc.perform(get("/").with(reader())).andReturn()))
-            .isEqualTo(1);
+            archivedPosts(mockMvc.perform(get("/").with(reader())).andReturn())
+        ).isEqualTo(1);
         assertThat(
-            archivedPosts(mockMvc.perform(get("/").with(admin())).andReturn()))
-            .isEqualTo(2);
+            archivedPosts(mockMvc.perform(get("/").with(admin())).andReturn())
+        ).isEqualTo(2);
     }
 
     // --- The real admin account, not a MockMvc stand-in -------------------
@@ -540,9 +579,11 @@ class AdminAuthorizationTests {
         saveAdminUser();
 
         mockMvc
-            .perform(formLogin("/login")
-                .user(ADMIN_USERNAME)
-                .password(ADMIN_PASSWORD))
+            .perform(
+                formLogin("/login")
+                    .user(ADMIN_USERNAME)
+                    .password(ADMIN_PASSWORD)
+            )
             .andExpect(authenticated().withRoles("ADMIN"));
     }
 
@@ -551,9 +592,11 @@ class AdminAuthorizationTests {
         saveAdminUser();
 
         mockMvc
-            .perform(formLogin("/login")
-                .user(ADMIN_USERNAME)
-                .password("not the password"))
+            .perform(
+                formLogin("/login")
+                    .user(ADMIN_USERNAME)
+                    .password("not the password")
+            )
             .andExpect(unauthenticated())
             .andExpect(redirectedUrl("/login?error=true"));
     }
@@ -564,9 +607,11 @@ class AdminAuthorizationTests {
         savePost(true);
 
         MvcResult login = mockMvc
-            .perform(formLogin("/login")
-                .user(ADMIN_USERNAME)
-                .password(ADMIN_PASSWORD))
+            .perform(
+                formLogin("/login")
+                    .user(ADMIN_USERNAME)
+                    .password(ADMIN_PASSWORD)
+            )
             .andReturn();
         MockHttpSession session = (MockHttpSession) login
             .getRequest()
@@ -582,10 +627,12 @@ class AdminAuthorizationTests {
         assertThat(Jsoup.parse(page).select("form.post__admin")).hasSize(1);
 
         mockMvc
-            .perform(post(PUBLISH_URL)
-                .session(session)
-                .with(csrf())
-                .param("published", "false"))
+            .perform(
+                post(PUBLISH_URL)
+                    .session(session)
+                    .with(csrf())
+                    .param("published", "false")
+            )
             .andExpect(status().isOk());
     }
 
@@ -601,8 +648,10 @@ class AdminAuthorizationTests {
 
     private static Authentication authenticatedWith(String... authorities) {
         return UsernamePasswordAuthenticationToken
-            .authenticated("someone", "password",
-                AuthorityUtils.createAuthorityList(authorities));
+            .authenticated(
+                "someone", "password",
+                AuthorityUtils.createAuthorityList(authorities)
+            );
     }
 
     private static Matcher<Object> draftPreview() {
@@ -623,8 +672,15 @@ class AdminAuthorizationTests {
             .sum();
     }
 
-    private void savePost(String slug, boolean published) {
-        BlogPost post = new BlogPost("Post " + slug, slug, "<p>Body.</p>");
+    private void savePost(
+        String slug,
+        boolean published
+    ) {
+        BlogPost post = new BlogPost(
+            "Post " + slug,
+            slug,
+            "<p>Body.</p>"
+        );
         post.setPublished(published);
         blogPostRepository.saveAndFlush(post);
     }
@@ -640,21 +696,31 @@ class AdminAuthorizationTests {
         // Flush and clear so this reads what was written, not the managed copy.
         entityManager.flush();
         entityManager.clear();
-        assertThat(blogPostRepository
-            .findOne(BlogPostPredicates.hasSlug(SLUG))
-            .orElseThrow()
-            .isPublished()).isEqualTo(expected);
+        assertThat(
+            blogPostRepository
+                .findOne(BlogPostPredicates.hasSlug(SLUG))
+                .orElseThrow()
+                .isPublished()
+        ).isEqualTo(expected);
     }
 
     private void savePost(boolean published) {
-        BlogPost post = new BlogPost("Toggle post", SLUG, "<p>Body.</p>");
+        BlogPost post = new BlogPost(
+            "Toggle post",
+            SLUG,
+            "<p>Body.</p>"
+        );
         post.setPublished(published);
         blogPostRepository.saveAndFlush(post);
     }
 
     private void saveAdminUser() {
         adminUserRepository
-            .saveAndFlush(new AdminUser(ADMIN_USERNAME,
-                passwordEncoder.encode(ADMIN_PASSWORD)));
+            .saveAndFlush(
+                new AdminUser(
+                    ADMIN_USERNAME,
+                    passwordEncoder.encode(ADMIN_PASSWORD)
+                )
+            );
     }
 }

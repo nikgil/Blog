@@ -40,8 +40,11 @@ class BlogPostPreviewServiceTests {
     private final TagRepository tagRepository;
 
     @Autowired
-    BlogPostPreviewServiceTests(BlogPostPreviewService previewService,
-        BlogPostRepository blogPostRepository, TagRepository tagRepository) {
+    BlogPostPreviewServiceTests(
+        BlogPostPreviewService previewService,
+        BlogPostRepository blogPostRepository,
+        TagRepository tagRepository
+    ) {
         this.previewService = previewService;
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
@@ -87,7 +90,13 @@ class BlogPostPreviewServiceTests {
 
     @Test
     void adminsStillGetTheTagFilterApplied() {
-        Tag spring = tagRepository.save(new Tag("Spring", "spring"));
+        Tag spring = tagRepository
+            .save(
+                new Tag(
+                    "Spring",
+                    "spring"
+                )
+            );
         saveTaggedPost("tagged-live", true, spring);
         saveTaggedPost("tagged-draft", false, spring);
         savePost("plain-draft", "Plain draft", false);
@@ -103,11 +112,21 @@ class BlogPostPreviewServiceTests {
     @Test
     void adminsStillGetTheSearchQueryApplied() {
         blogPostRepository
-            .save(new BlogPost("Needle draft", "needle-draft",
-                "<p>Has a needle inside.</p>"));
+            .save(
+                new BlogPost(
+                    "Needle draft",
+                    "needle-draft",
+                    "<p>Has a needle inside.</p>"
+                )
+            );
         blogPostRepository
-            .save(new BlogPost("Other draft", "other-draft",
-                "<p>Nothing relevant.</p>"));
+            .save(
+                new BlogPost(
+                    "Other draft",
+                    "other-draft",
+                    "<p>Nothing relevant.</p>"
+                )
+            );
 
         PostFilters filters = new PostFilters();
         filters.setQuery("needle");
@@ -144,8 +163,10 @@ class BlogPostPreviewServiceTests {
         return previewSlugs(new PostFilters(), auth);
     }
 
-    private List<String> previewSlugs(PostFilters filters,
-        Authentication auth) {
+    private List<String> previewSlugs(
+        PostFilters filters,
+        Authentication auth
+    ) {
         return previewService
             .findPreviews(FIRST_PAGE, filters, auth)
             .getContent()
@@ -164,19 +185,36 @@ class BlogPostPreviewServiceTests {
 
     private static Authentication authenticatedWith(String... authorities) {
         return UsernamePasswordAuthenticationToken
-            .authenticated("someone", "password",
-                AuthorityUtils.createAuthorityList(authorities));
+            .authenticated(
+                "someone", "password",
+                AuthorityUtils.createAuthorityList(authorities)
+            );
     }
 
-    private void savePost(String slug, String title, boolean published) {
-        BlogPost post = new BlogPost(title, slug, "<p>Article content.</p>");
+    private void savePost(
+        String slug,
+        String title,
+        boolean published
+    ) {
+        BlogPost post = new BlogPost(
+            title,
+            slug,
+            "<p>Article content.</p>"
+        );
         post.setPublished(published);
         blogPostRepository.save(post);
     }
 
-    private void saveTaggedPost(String slug, boolean published, Tag tag) {
-        BlogPost post = new BlogPost("Tagged " + slug, slug,
-            "<p>Article content.</p>");
+    private void saveTaggedPost(
+        String slug,
+        boolean published,
+        Tag tag
+    ) {
+        BlogPost post = new BlogPost(
+            "Tagged " + slug,
+            slug,
+            "<p>Article content.</p>"
+        );
         post.addTag(tag);
         post.setPublished(published);
         blogPostRepository.save(post);

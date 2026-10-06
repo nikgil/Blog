@@ -24,8 +24,10 @@ public class AdminUserSeeder implements ApplicationRunner {
     private final AdminUserRepository adminUserRepository;
     private final AdminUserProperties properties;
 
-    public AdminUserSeeder(AdminUserRepository adminUserRepository,
-        AdminUserProperties properties) {
+    public AdminUserSeeder(
+        AdminUserRepository adminUserRepository,
+        AdminUserProperties properties
+    ) {
         this.adminUserRepository = adminUserRepository;
         this.properties = properties;
     }
@@ -45,13 +47,15 @@ public class AdminUserSeeder implements ApplicationRunner {
         if (username.contains("${") || passwordHash.contains("${")) {
             throw new IllegalStateException(
                 "Set BLOG_ADMIN_USERNAME and BLOG_ADMIN_PASSWORD_HASH;"
-                    + " blog.admin.* contains an unresolved placeholder.");
+                    + " blog.admin.* contains an unresolved placeholder."
+            );
         }
 
         // Seems I have to do this manually
         if (!BCRYPT_HASH.matcher(passwordHash).matches()) {
             throw new IllegalStateException(
-                "blog.admin.password-hash is not a BCrypt hash.");
+                "blog.admin.password-hash is not a BCrypt hash."
+            );
         }
 
         // Removing or renaming the admin in configuration revokes the old one.
@@ -59,7 +63,12 @@ public class AdminUserSeeder implements ApplicationRunner {
 
         AdminUser adminUser = adminUserRepository
             .findByUsername(username)
-            .orElseGet(() -> new AdminUser(username, passwordHash));
+            .orElseGet(
+                () -> new AdminUser(
+                    username,
+                    passwordHash
+                )
+            );
         adminUser.setPasswordHash(passwordHash);
         adminUserRepository.save(adminUser);
     }

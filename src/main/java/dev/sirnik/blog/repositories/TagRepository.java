@@ -30,7 +30,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         order by post.id, lower(tag.name), tag.name, tag.id
         """)
     List<BlogPostTagRow> findForPostIds(
-        @Param("postIds") Collection<Long> postIds);
+        @Param("postIds") Collection<Long> postIds
+    );
 
     @Query("""
         select tag.name as name,
@@ -43,6 +44,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         group by tag.id, tag.name, tag.slug
         order by lower(tag.name), tag.name, tag.id
         """)
-    Slice<TagLink> findTagLinks(@Param("prefix") String prefix,
-        Pageable pageable);
+    Slice<TagLink> findTagLinks(
+        @Param("prefix") String prefix,
+        Pageable pageable
+    );
 }

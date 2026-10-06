@@ -42,10 +42,12 @@ public class TestBlogPostGenerator {
                 .nextInt(loremIpsumStrings.length)] + " "
                 + loremIpsumStrings[randomiser
                     .nextInt(loremIpsumStrings.length)];
-            BlogPost b = new BlogPost(title,
+            BlogPost b = new BlogPost(
+                title,
                 title.replace(" ", "_") + "_" + seed + "_" + i,
                 LoremIpsumGenerator
-                    .getParagraphs(randomiser.nextInt(1, 5), true));
+                    .getParagraphs(randomiser.nextInt(1, 5), true)
+            );
             List<Tag> tags = getRandomTagSubset(randomiser);
 
             tags.forEach(b::addTag);
@@ -74,14 +76,20 @@ public class TestBlogPostGenerator {
             BlogPost post = posts.get(index);
             post
                 .setContent(
-                    addGeneratedContent(post, posts, seed, index, randomiser));
+                    addGeneratedContent(post, posts, seed, index, randomiser)
+                );
         }
 
         return posts;
     }
 
-    private String addGeneratedContent(BlogPost post, List<BlogPost> allPosts,
-        int seed, int postIndex, Random randomiser) {
+    private String addGeneratedContent(
+        BlogPost post,
+        List<BlogPost> allPosts,
+        int seed,
+        int postIndex,
+        Random randomiser
+    ) {
         int amountOfContent = randomiser.nextInt(0, 30);
         Document document = Jsoup.parseBodyFragment(post.getContent());
 
@@ -101,8 +109,9 @@ public class TestBlogPostGenerator {
             } else {
                 if (builder.imageGenerator != null) {
                     builder.imageGenerator
-                        .addRandomImage(document, post, seed, postIndex,
-                            randomiser);
+                        .addRandomImage(
+                            document, post, seed, postIndex, randomiser
+                        );
                     addedCount++;
                 }
             }
@@ -111,8 +120,12 @@ public class TestBlogPostGenerator {
         return document.body().html();
     }
 
-    private void addRandomLink(Document document, BlogPost currentPost,
-        List<BlogPost> allPosts, Random randomiser) {
+    private void addRandomLink(
+        Document document,
+        BlogPost currentPost,
+        List<BlogPost> allPosts,
+        Random randomiser
+    ) {
         List<Element> paragraphs = document.body().select("p");
         if (paragraphs.isEmpty()) {
             return;
@@ -129,8 +142,9 @@ public class TestBlogPostGenerator {
         int firstWord = randomiser.nextInt(words.length - wordCount + 1);
         String beforeLink = joinWords(words, 0, firstWord);
         String linkText = joinWords(words, firstWord, firstWord + wordCount);
-        String afterLink = joinWords(words, firstWord + wordCount,
-            words.length);
+        String afterLink = joinWords(
+            words, firstWord + wordCount, words.length
+        );
         String linkTarget = chooseLinkTarget(currentPost, allPosts, randomiser);
 
         paragraph.empty();
@@ -151,8 +165,11 @@ public class TestBlogPostGenerator {
         }
     }
 
-    private String chooseLinkTarget(BlogPost currentPost,
-        List<BlogPost> allPosts, Random randomiser) {
+    private String chooseLinkTarget(
+        BlogPost currentPost,
+        List<BlogPost> allPosts,
+        Random randomiser
+    ) {
         List<BlogPost> internalTargets = allPosts
             .stream()
             .filter(post -> post != currentPost)
@@ -167,7 +184,11 @@ public class TestBlogPostGenerator {
         return "/posts/" + target.getSlug();
     }
 
-    private String joinWords(String[] words, int start, int end) {
+    private String joinWords(
+        String[] words,
+        int start,
+        int end
+    ) {
         return String.join(" ", List.of(words).subList(start, end));
     }
 
@@ -178,8 +199,10 @@ public class TestBlogPostGenerator {
 
         while (output.size() < amount) {
             output
-                .add(builder.tagsToUse
-                    .get(randomiser.nextInt(builder.tagsToUse.size())));
+                .add(
+                    builder.tagsToUse
+                        .get(randomiser.nextInt(builder.tagsToUse.size()))
+                );
         }
 
         return new ArrayList<>(output);
@@ -211,7 +234,8 @@ public class TestBlogPostGenerator {
         public Builder setMinimumTime(Instant time) {
             if (maximumtime != null && maximumtime.isBefore(time)) {
                 throw new IllegalArgumentException(
-                    "Time for minimum should be before the max time");
+                    "Time for minimum should be before the max time"
+                );
             }
 
             this.mininumTime = time;
@@ -222,7 +246,8 @@ public class TestBlogPostGenerator {
         public Builder setMaximumTime(Instant time) {
             if (mininumTime != null && mininumTime.isAfter(time)) {
                 throw new IllegalArgumentException(
-                    "Time for maximum should be after the min time");
+                    "Time for maximum should be after the min time"
+                );
             }
 
             this.maximumtime = time;

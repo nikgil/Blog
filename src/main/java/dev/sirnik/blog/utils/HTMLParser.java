@@ -27,8 +27,12 @@ public class HTMLParser {
         return preview.isBlank() ? FALLBACK_EMPTY_PREVIEW_STRING : preview;
     }
 
-    public static boolean insertAtRandomPosition(Element parent,
-        Element element, Random randomiser, boolean preventChaining) {
+    public static boolean insertAtRandomPosition(
+        Element parent,
+        Element element,
+        Random randomiser,
+        boolean preventChaining
+    ) {
         int position = randomiser.nextInt(parent.childrenSize() + 1);
 
         if (preventChaining
@@ -45,8 +49,11 @@ public class HTMLParser {
         return true;
     }
 
-    private static boolean wouldChainIfInserted(Element parent, int position,
-        String elementTag) {
+    private static boolean wouldChainIfInserted(
+        Element parent,
+        int position,
+        String elementTag
+    ) {
         Element previousElement = position == 0
             ? null
             : parent.child(position - 1);

@@ -28,22 +28,48 @@ class TagRepositoryTests {
     private final TagRepository tagRepository;
 
     @Autowired
-    TagRepositoryTests(BlogPostRepository blogPostRepository,
-        TagRepository tagRepository) {
+    TagRepositoryTests(
+        BlogPostRepository blogPostRepository,
+        TagRepository tagRepository
+    ) {
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
     }
 
     @Test
     void tagLinksCountOnlyPublishedPostsAndIncludeUnusedTags() {
-        Tag java = tagRepository.save(new Tag("Java", "java"));
-        Tag spring = tagRepository.save(new Tag("Spring", "spring"));
+        Tag java = tagRepository
+            .save(
+                new Tag(
+                    "Java",
+                    "java"
+                )
+            );
+        Tag spring = tagRepository
+            .save(
+                new Tag(
+                    "Spring",
+                    "spring"
+                )
+            );
         Tag springBoot = tagRepository
-            .save(new Tag("Spring Boot", "spring-boot"));
-        tagRepository.save(new Tag("Spring Cloud", "spring-cloud"));
+            .save(
+                new Tag(
+                    "Spring Boot",
+                    "spring-boot"
+                )
+            );
+        tagRepository
+            .save(
+                new Tag(
+                    "Spring Cloud",
+                    "spring-cloud"
+                )
+            );
 
-        savePost("Published Spring", "published-spring", true, spring,
-            springBoot);
+        savePost(
+            "Published Spring", "published-spring", true, spring, springBoot
+        );
         savePost("Another Boot post", "another-boot-post", true, springBoot);
         savePost("Spring draft", "spring-draft", false, spring);
         savePost("Published Java", "published-java", true, java);
@@ -62,7 +88,13 @@ class TagRepositoryTests {
     void tagLinksUseStableSlicePaging() {
         List<Tag> tags = new ArrayList<>();
         for (int i = 0; i < 11; i++) {
-            tags.add(new Tag("Tag %02d".formatted(i), "tag-%02d".formatted(i)));
+            tags
+                .add(
+                    new Tag(
+                        "Tag %02d".formatted(i),
+                        "tag-%02d".formatted(i)
+                    )
+                );
         }
         tagRepository.saveAllAndFlush(tags);
 
@@ -73,8 +105,10 @@ class TagRepositoryTests {
 
         assertThat(firstPage.getContent())
             .extracting(TagLink::getName)
-            .containsExactly("Tag 00", "Tag 01", "Tag 02", "Tag 03", "Tag 04",
-                "Tag 05", "Tag 06", "Tag 07", "Tag 08", "Tag 09");
+            .containsExactly(
+                "Tag 00", "Tag 01", "Tag 02", "Tag 03", "Tag 04", "Tag 05",
+                "Tag 06", "Tag 07", "Tag 08", "Tag 09"
+            );
         assertThat(firstPage.hasPrevious()).isFalse();
         assertThat(firstPage.hasNext()).isTrue();
         assertThat(secondPage.getContent())
@@ -84,9 +118,17 @@ class TagRepositoryTests {
         assertThat(secondPage.hasNext()).isFalse();
     }
 
-    private void savePost(String title, String slug, boolean published,
-        Tag... tags) {
-        BlogPost post = new BlogPost(title, slug, "Article content.");
+    private void savePost(
+        String title,
+        String slug,
+        boolean published,
+        Tag... tags
+    ) {
+        BlogPost post = new BlogPost(
+            title,
+            slug,
+            "Article content."
+        );
         post.setPublished(published);
         for (Tag tag : tags) {
             post.addTag(tag);
