@@ -19,6 +19,8 @@
                     <header class="post__header">
                         <h2 class="title is-2 mb-4">${post.title}</h2>
 
+                        <#include "partials/publish-toggle.ftl">
+
                         <div class="post__dates" aria-label="Post dates">
                             <span>
                                 Created

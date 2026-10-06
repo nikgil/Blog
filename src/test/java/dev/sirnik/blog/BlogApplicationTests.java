@@ -18,12 +18,14 @@ import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -454,6 +456,303 @@ class BlogApplicationTests {
             .contains("preload=\"mouseover\"")
             .contains("href=\"/css/post.css\"")
             .contains("src=\"/js/post.js\"");
+    }
+
+    @Test
+    void postTemplateShowsUnpublishToggleForLoggedInAdminOnPublishedPost()
+        throws Exception {
+        Document document = renderPostPage("published-post", true, true);
+
+        Element form = document
+            .selectFirst(
+                "form.post__admin[action=/posts/published-post/publish][method=post]");
+        assertThat(form).isNotNull();
+        assertThat(form.select("button[type=submit]").text())
+            .isEqualTo("Unpublish");
+        assertThat(form.select("input[name=published]").attr("value"))
+            .isEqualTo("false");
+        assertThat(form.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+        assertThat(form.select(".tag").text()).isEqualTo("Published");
+    }
+
+    @Test
+    void postTemplateShowsPublishToggleForLoggedInAdminOnDraft()
+        throws Exception {
+        Document document = renderPostPage("draft-post", false, true);
+
+        Element form = document.selectFirst("form.post__admin");
+        assertThat(form).isNotNull();
+        assertThat(form.select("button[type=submit]").text())
+            .isEqualTo("Publish");
+        assertThat(form.select("input[name=published]").attr("value"))
+            .isEqualTo("true");
+        assertThat(form.select(".tag").text()).isEqualTo("Unpublished");
+    }
+
+    @Test
+    void publishedPostPageShowsToggleWithCsrfTokenOnlyToLoggedInUser()
+        throws Exception {
+        savePost("Toggle post", "toggle-post", true);
+        blogPostRepository.flush();
+
+        String asAdmin = mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/posts/toggle-post")
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("admin")
+                    .roles("ADMIN")))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        Document adminPage = Jsoup.parse(asAdmin);
+        assertThat(adminPage
+            .select("form.post__admin[action=/posts/toggle-post/publish]"))
+            .hasSize(1);
+        assertThat(adminPage.select("form.post__admin input[name=_csrf]"))
+            .hasSize(1);
+        assertThat(adminPage.select("#publish-toggle-span")).hasSize(1);
+        assertThat(
+            adminPage.select("#publish-toggle-span > form#publish-toggle"))
+            .hasSize(1);
+
+        String asVisitor = mockMvc
+            .perform(MockMvcRequestBuilders.get("/posts/toggle-post"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        assertThat(Jsoup.parse(asVisitor).select("form.post__admin")).isEmpty();
+    }
+
+    @Test
+    void publishToggleFragmentIsASingleSwapTargetWrappingTheForm()
+        throws Exception {
+        BlogPost post = new BlogPost("Toggle post", "toggle-post",
+            "<p>Body.</p>");
+        post.setPublished(true);
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+        model.put("loggedIn", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/publish-toggle.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(rendered.toString()).doesNotContain("<html");
+        assertThat(document.body().children()).hasSize(1);
+        Element swapTarget = document.body().child(0);
+        assertThat(swapTarget.id()).isEqualTo("publish-toggle-span");
+        assertThat(document.select("#publish-toggle-span")).hasSize(1);
+
+        Element form = swapTarget.selectFirst("form#publish-toggle");
+        assertThat(form).isNotNull();
+        assertThat(form.attr("action")).isEqualTo("/posts/toggle-post/publish");
+        assertThat(form.select("button").text()).isEqualTo("Unpublish");
+        assertThat(form.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+
+        // The response must replace the element hx-target points at (the
+        // fragment's own root); otherwise each toggle nests another wrapper.
+        assertThat(form.attr("hx-post")).isEqualTo(form.attr("action"));
+        assertThat(form.attr("hx-target")).isEqualTo("#" + swapTarget.id());
+        assertThat(form.attr("hx-swap")).isEqualTo("outerHTML");
+    }
+
+    @Test
+    void publishToggleFragmentRendersNothingForVisitors() throws Exception {
+        BlogPost post = new BlogPost("Toggle post", "toggle-post",
+            "<p>Body.</p>");
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/publish-toggle.ftl")
+            .process(model, rendered);
+
+        assertThat(rendered.toString().strip()).isEmpty();
+    }
+
+    @Test
+    void postTemplateHidesToggleFromVisitors() throws Exception {
+        Document document = renderPostPage("published-post", true, false);
+
+        assertThat(document.select("form.post__admin")).isEmpty();
+        assertThat(document.select("form[action$=/publish]")).isEmpty();
+        assertThat(document.select("#publish-toggle-span")).isEmpty();
+    }
+
+    private Document renderPostPage(String slug, boolean published,
+        boolean loggedIn) throws Exception {
+        BlogPost post = new BlogPost("Toggle post", slug, "<p>Body.</p>");
+        post.setPublished(published);
+        post.setCreationTimestamps();
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+        model.put("loggedIn", loggedIn);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+        model
+            .put("postDateFormatter",
+                DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("post.ftl")
+            .process(model, rendered);
+        return Jsoup.parse(rendered.toString());
+    }
+
+    @Test
+    void loginTemplateRendersFormErrorAndCsrfToken() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("error", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/login][method=post]"))
+            .hasSize(1);
+        assertThat(document.select("label[for=login-username]")).hasSize(1);
+        assertThat(document.select("input#login-username[name=username]"))
+            .hasSize(1);
+        assertThat(document.select("input#login-password[name=password]"))
+            .hasSize(1);
+        assertThat(document.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+        assertThat(document.select("p.help.is-danger#login-error").text())
+            .contains("Invalid username or password");
+        assertThat(document.select("input.input.is-danger[aria-invalid=true]"))
+            .hasSize(2);
+        assertThat(document.select("input[aria-describedby=login-error]"))
+            .hasSize(2);
+        assertThat(rendered.toString()).contains("href=\"/css/login.css\"");
+    }
+
+    @Test
+    void loginTemplateShowsOnlyLogoutWhenLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+        model.put("success", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/logout][method=post]"))
+            .hasSize(1);
+        assertThat(document.select("form[action=/logout] button[type=submit]"))
+            .hasSize(1);
+        assertThat(document.select("form[action=/logout] button").text())
+            .isEqualTo("Log out");
+        assertThat(document
+            .select("form[action=/logout] input[name=_csrf]")
+            .attr("value")).isEqualTo("abc123");
+        assertThat(document.select("form[action=/login]")).isEmpty();
+        assertThat(
+            document.select("input[name=username], input[name=password]"))
+            .isEmpty();
+        assertThat(document
+            .select(".toast-region .toast.is-success[role=status]")
+            .text()).contains("You are logged in");
+        assertThat(document.select(".login-page__card .notification"))
+            .isEmpty();
+    }
+
+    @Test
+    void loginTemplateShowsPreviousLoginTimeWhenLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+        model.put("previousLogin", "2026-10-04 09:30 UTC");
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("#previous-login").text())
+            .isEqualTo("Last login: 2026-10-04 09:30 UTC");
+    }
+
+    @Test
+    void loginTemplateSaysFirstLoginWhenThereIsNoPreviousLogin()
+        throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("#previous-login").text())
+            .isEqualTo("This is your first login");
+    }
+
+    @Test
+    void loginTemplateOmitsSuccessNoticeWhenAlreadyLoggedIn() throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("loggedIn", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select("form[action=/logout]")).hasSize(1);
+        assertThat(document.select(".notification.is-success")).isEmpty();
+    }
+
+    @Test
+    void loginTemplateShowsLogoutNoticeAndFormAfterLoggingOut()
+        throws Exception {
+        Map<String, Object> model = new HashMap<>();
+        model.put("logout", true);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(
+            document.select(".toast-region .toast.is-info[role=status]").text())
+            .contains("You have been logged out");
+        assertThat(document.select(".login-page__card .notification"))
+            .isEmpty();
+        assertThat(document.select("form[action=/login]")).hasSize(1);
+        assertThat(document.select("form[action=/logout]")).isEmpty();
+    }
+
+    @Test
+    void loginTemplateRendersWithoutErrorOrToken() throws Exception {
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("login.ftl")
+            .process(new HashMap<String, Object>(), rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(document.select(".help.is-danger, .input.is-danger"))
+            .isEmpty();
+        assertThat(document.select("[aria-invalid]")).isEmpty();
+        assertThat(document.select("input[type=hidden]")).isEmpty();
     }
 
     @Test

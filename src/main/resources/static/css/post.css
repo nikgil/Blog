@@ -9,6 +9,15 @@
     padding-bottom: 1.5rem;
 }
 
+/* Admin-only publish toggle under the headline */
+.post__admin {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
 .post__dates {
     align-items: center;
     color: var(--bulma-text-weak, #7a7a7a);

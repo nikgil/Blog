@@ -13,4 +13,6 @@ public interface BlogPostPreview {
     String getSlug();
 
     String getTitle();
+
+    boolean isPublished();
 }

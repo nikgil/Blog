@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.PredicateSpecification;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import dev.sirnik.blog.models.views.BlogPostPreviewView;
 import dev.sirnik.blog.repositories.BlogPostPredicates;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
+import dev.sirnik.blog.utils.AuthenticationUtils;
 
 @Service
 public class BlogPostPreviewService {
@@ -41,17 +43,28 @@ public class BlogPostPreviewService {
         this.tagRepository = tagRepository;
     }
 
-    public List<ArchiveMonth> getArchiveMonths() {
-        return blogPostRepository.findAllBlogPostsMonths();
+    /**
+     * Counts posts per month. Drafts are counted only for a valid admin.
+     */
+    public List<ArchiveMonth> getArchiveMonths(Authentication auth) {
+        return blogPostRepository
+            .findAllBlogPostsMonths(AuthenticationUtils.isValidAdmin(auth));
     }
 
+    /**
+     * Finds post previews matching the filters. If user has invalid auth then
+     * will only get published.
+     */
     @Transactional(readOnly = true)
     public Slice<BlogPostPreviewView> findPreviews(Pageable pageable,
-        PostFilters filters) {
+        PostFilters filters, Authentication auth) {
         PredicateSpecification<BlogPost> predicate = BlogPostPredicates
-            .isPublished()
-            .and(BlogPostPredicates.hasTagSlug(filters.getTag()))
+            .hasTagSlug(filters.getTag())
             .and(BlogPostPredicates.contentContains(filters.getQuery()));
+
+        if (!AuthenticationUtils.isValidAdmin(auth)) {
+            predicate = predicate.and(BlogPostPredicates.isPublished());
+        }
 
         TimeFilter timeFilter = createTimeFilter(filters.getYear(),
             filters.getMonth());
