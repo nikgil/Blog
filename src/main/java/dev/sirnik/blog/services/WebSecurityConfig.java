@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import dev.sirnik.blog.utils.AuthenticationUtils;
+
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
@@ -15,7 +17,11 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
             .authorizeHttpRequests(
-                requests -> requests.requestMatchers("/**").permitAll())
+                requests -> requests
+                    .requestMatchers("/posts/*/publish")
+                    .hasRole(AuthenticationUtils.ADMIN_ROLE.getAuthority())
+                    .requestMatchers("/**")
+                    .permitAll())
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")

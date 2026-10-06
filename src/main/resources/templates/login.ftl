@@ -5,17 +5,10 @@
   <#import "partials/head.ftl" as head>
     <@head.render title="Admin login | sirnik.Dev" stylesheet="login" />
     <#import "partials/header.ftl" as header>
+    <#import "partials/csrf.ftl" as csrf>
 </head>
 
-<#-- Spring Security rejects every POST without this token; _csrf only exists in FreeMarker when request attributes are
-  exposed. -->
-  <#macro csrfField>
-    <#if _csrf??>
-      <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
-    </#if>
-  </#macro>
-
-  <body>
+<body>
     <section class="section login-page">
       <div class="container">
         <@header.render />
@@ -36,7 +29,7 @@
                       </h3>
 
                       <form action="/logout" method="post">
-                        <@csrfField />
+                        <@csrf.field />
                         <div class="field">
                           <div class="control">
                             <button class="button is-link is-fullwidth" type="submit">Log out</button>
@@ -46,7 +39,7 @@
                       <#else>
 
                         <form action="/login" method="post">
-                          <@csrfField />
+                          <@csrf.field />
 
                           <#-- Bulma validation pattern: is-danger on the inputs plus a help line. Spring Security does
                             not say which field was wrong, so both are marked. -->

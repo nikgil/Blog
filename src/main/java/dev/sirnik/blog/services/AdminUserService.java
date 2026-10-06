@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.models.AdminUser;
 import dev.sirnik.blog.repositories.AdminUserRepository;
+import dev.sirnik.blog.utils.AuthenticationUtils;
 
 /**
  * Spring Security calls loadUserByUsername during form login, then compares the
@@ -40,7 +41,7 @@ public class AdminUserService implements UserDetailsService {
         return User
             .withUsername(adminUser.getUsername())
             .password(adminUser.getPasswordHash())
-            .roles("ADMIN")
+            .roles(AuthenticationUtils.ADMIN_ROLE.getAuthority())
             .build();
     }
 

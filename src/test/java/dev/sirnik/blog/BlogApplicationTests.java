@@ -18,12 +18,14 @@ import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -454,6 +456,142 @@ class BlogApplicationTests {
             .contains("preload=\"mouseover\"")
             .contains("href=\"/css/post.css\"")
             .contains("src=\"/js/post.js\"");
+    }
+
+    @Test
+    void postTemplateShowsUnpublishToggleForLoggedInAdminOnPublishedPost()
+        throws Exception {
+        Document document = renderPostPage("published-post", true, true);
+
+        Element form = document
+            .selectFirst(
+                "form.post__admin[action=/posts/published-post/publish][method=post]");
+        assertThat(form).isNotNull();
+        assertThat(form.select("button[type=submit]").text())
+            .isEqualTo("Unpublish");
+        assertThat(form.select("input[name=published]").attr("value"))
+            .isEqualTo("false");
+        assertThat(form.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+        assertThat(form.select(".tag").text()).isEqualTo("Published");
+    }
+
+    @Test
+    void postTemplateShowsPublishToggleForLoggedInAdminOnDraft()
+        throws Exception {
+        Document document = renderPostPage("draft-post", false, true);
+
+        Element form = document.selectFirst("form.post__admin");
+        assertThat(form).isNotNull();
+        assertThat(form.select("button[type=submit]").text())
+            .isEqualTo("Publish");
+        assertThat(form.select("input[name=published]").attr("value"))
+            .isEqualTo("true");
+        assertThat(form.select(".tag").text()).isEqualTo("Draft");
+    }
+
+    @Test
+    void publishedPostPageShowsToggleWithCsrfTokenOnlyToLoggedInUser()
+        throws Exception {
+        savePost("Toggle post", "toggle-post", true);
+        blogPostRepository.flush();
+
+        String asAdmin = mockMvc
+            .perform(MockMvcRequestBuilders
+                .get("/posts/toggle-post")
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("admin")
+                    .roles("ADMIN")))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        Document adminPage = Jsoup.parse(asAdmin);
+        assertThat(adminPage
+            .select("form.post__admin[action=/posts/toggle-post/publish]"))
+            .hasSize(1);
+        assertThat(adminPage.select("form.post__admin input[name=_csrf]"))
+            .hasSize(1);
+
+        String asVisitor = mockMvc
+            .perform(MockMvcRequestBuilders.get("/posts/toggle-post"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        assertThat(Jsoup.parse(asVisitor).select("form.post__admin")).isEmpty();
+    }
+
+    @Test
+    void publishToggleFragmentRendersAloneAsTheSwapTarget() throws Exception {
+        BlogPost post = new BlogPost("Toggle post", "toggle-post",
+            "<p>Body.</p>");
+        post.setPublished(true);
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+        model.put("loggedIn", true);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/publish-toggle.ftl")
+            .process(model, rendered);
+
+        Document document = Jsoup.parse(rendered.toString());
+        assertThat(rendered.toString()).doesNotContain("<html");
+        assertThat(document.body().children()).hasSize(1);
+        Element form = document.body().child(0);
+        assertThat(form.id()).isEqualTo("publish-toggle");
+        assertThat(form.attr("action")).isEqualTo("/posts/toggle-post/publish");
+        assertThat(form.select("button").text()).isEqualTo("Unpublish");
+        assertThat(form.select("input[name=_csrf]").attr("value"))
+            .isEqualTo("abc123");
+    }
+
+    @Test
+    void publishToggleFragmentRendersNothingForVisitors() throws Exception {
+        BlogPost post = new BlogPost("Toggle post", "toggle-post",
+            "<p>Body.</p>");
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("partials/publish-toggle.ftl")
+            .process(model, rendered);
+
+        assertThat(rendered.toString().strip()).isEmpty();
+    }
+
+    @Test
+    void postTemplateHidesToggleFromVisitors() throws Exception {
+        Document document = renderPostPage("published-post", true, false);
+
+        assertThat(document.select("form.post__admin")).isEmpty();
+        assertThat(document.select("form[action$=/publish]")).isEmpty();
+    }
+
+    private Document renderPostPage(String slug, boolean published,
+        boolean loggedIn) throws Exception {
+        BlogPost post = new BlogPost("Toggle post", slug, "<p>Body.</p>");
+        post.setPublished(published);
+        post.setCreationTimestamps();
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("post", post);
+        model.put("loggedIn", loggedIn);
+        model.put("_csrf", Map.of("parameterName", "_csrf", "token", "abc123"));
+        model
+            .put("postDateFormatter",
+                DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC));
+
+        StringWriter rendered = new StringWriter();
+        freeMarkerConfiguration
+            .getTemplate("post.ftl")
+            .process(model, rendered);
+        return Jsoup.parse(rendered.toString());
     }
 
     @Test

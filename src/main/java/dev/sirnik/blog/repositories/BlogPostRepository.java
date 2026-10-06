@@ -15,8 +15,11 @@ import dev.sirnik.blog.models.projections.BlogPostLink;
 
 public interface BlogPostRepository
     extends
-        JpaRepository<BlogPost, Long>,
-        JpaSpecificationExecutor<BlogPost> {
+    JpaRepository<BlogPost, Long>,
+    JpaSpecificationExecutor<BlogPost> {
+
+    @EntityGraph(attributePaths = "tags")
+    Optional<BlogPost> findBySlug(String slug);
 
     @EntityGraph(attributePaths = "tags")
     Optional<BlogPost> findBySlugAndPublishedTrue(String slug);
