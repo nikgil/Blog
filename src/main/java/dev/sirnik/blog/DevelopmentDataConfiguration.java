@@ -47,14 +47,18 @@ public class DevelopmentDataConfiguration implements WebMvcConfigurer {
 
     @Bean
     TestImageGenerator testImageGenerator() {
-        return new TestImageGenerator(GENERATED_IMAGE_DIRECTORY,
-            GENERATED_IMAGE_PATH);
+        return new TestImageGenerator(
+            GENERATED_IMAGE_DIRECTORY,
+            GENERATED_IMAGE_PATH
+        );
     }
 
     @Bean
-    ApplicationRunner seedBlogPosts(TagRepository tagRepository,
+    ApplicationRunner seedBlogPosts(
+        TagRepository tagRepository,
         BlogPostRepository blogPostRepository,
-        TestImageGenerator imageGenerator) {
+        TestImageGenerator imageGenerator
+    ) {
         return arguments -> {
             // DevTools can restart Spring while the in-memory H2
             // database stays
@@ -73,10 +77,12 @@ public class DevelopmentDataConfiguration implements WebMvcConfigurer {
                 .setTagsToUse(allTags)
                 .setPostsToGenerate(50)
                 .setImageGenerator(imageGenerator)
-                .setMinimumTime(ZonedDateTime
-                    .now(ZoneOffset.UTC)
-                    .minus(Period.ofYears(2))
-                    .toInstant())
+                .setMinimumTime(
+                    ZonedDateTime
+                        .now(ZoneOffset.UTC)
+                        .minus(Period.ofYears(2))
+                        .toInstant()
+                )
                 .setMaximumTime(Instant.now())
                 .build();
 

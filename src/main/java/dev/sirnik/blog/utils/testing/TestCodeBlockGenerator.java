@@ -26,8 +26,10 @@ public class TestCodeBlockGenerator {
     private TestCodeBlockGenerator() {
     }
 
-    public static boolean addRandomCodeBlocks(Document document,
-        Random randomiser) {
+    public static boolean addRandomCodeBlocks(
+        Document document,
+        Random randomiser
+    ) {
         Element pre = new Element("pre");
 
         pre
@@ -47,8 +49,10 @@ public class TestCodeBlockGenerator {
 
         for (int i = 0; i < amount; i++) {
             sb
-                .append(CODE_SAMPLES[randomiser.nextInt(CODE_SAMPLES.length)]
-                    .strip())
+                .append(
+                    CODE_SAMPLES[randomiser.nextInt(CODE_SAMPLES.length)]
+                        .strip()
+                )
                 .append("\n");
         }
 

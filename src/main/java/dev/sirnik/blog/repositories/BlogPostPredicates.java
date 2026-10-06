@@ -12,25 +12,34 @@ public final class BlogPostPredicates {
     }
 
     public static PredicateSpecification<BlogPost> isPublished() {
-        return (post, builder) -> builder.isTrue(post.get("published"));
+        return (
+            post,
+            builder) -> builder.isTrue(post.get("published"));
     }
 
     // Unlike the optional filters below, a blank slug must never widen the
     // lookup to "any post", so this does not fall back to unrestricted().
     public static PredicateSpecification<BlogPost> hasSlug(String slug) {
-        return (post, builder) -> builder.equal(post.get("slug"), slug);
+        return (
+            post,
+            builder) -> builder.equal(post.get("slug"), slug);
     }
 
     public static PredicateSpecification<BlogPost> createdAtOrAfter(
-        Instant startInclusive) {
-        return (post, builder) -> builder
-            .greaterThanOrEqualTo(post.get("createdAt"), startInclusive);
+        Instant startInclusive
+    ) {
+        return (
+            post,
+            builder) -> builder
+                .greaterThanOrEqualTo(post.get("createdAt"), startInclusive);
     }
 
     public static PredicateSpecification<BlogPost> createdBefore(
-        Instant endExclusive) {
-        return (post, builder) -> builder
-            .lessThan(post.get("createdAt"), endExclusive);
+        Instant endExclusive
+    ) {
+        return (
+            post,
+            builder) -> builder.lessThan(post.get("createdAt"), endExclusive);
     }
 
     public static PredicateSpecification<BlogPost> hasTagSlug(String tagSlug) {
@@ -39,19 +48,24 @@ public final class BlogPostPredicates {
         }
 
         String normalizedTagSlug = tagSlug.strip();
-        return (post, builder) -> builder
-            .equal(post.join("tags").get("slug"), normalizedTagSlug);
+        return (
+            post,
+            builder) -> builder
+                .equal(post.join("tags").get("slug"), normalizedTagSlug);
     }
 
     public static PredicateSpecification<BlogPost> contentContains(
-        String query) {
+        String query
+    ) {
         if (query == null || query.isBlank()) {
             return PredicateSpecification.unrestricted();
         }
 
         String normalizedQuery = "%" + query.strip().toLowerCase() + "%";
 
-        return (post, builder) -> builder
-            .like(builder.lower(post.get("content")), normalizedQuery);
+        return (
+            post,
+            builder) -> builder
+                .like(builder.lower(post.get("content")), normalizedQuery);
     }
 }

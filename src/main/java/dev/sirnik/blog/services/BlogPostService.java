@@ -26,7 +26,10 @@ public class BlogPostService {
      * published.
      */
     @Transactional(readOnly = true)
-    public Optional<BlogPost> findBySlug(String slug, Authentication auth) {
+    public Optional<BlogPost> findBySlug(
+        String slug,
+        Authentication auth
+    ) {
         PredicateSpecification<BlogPost> predicates = BlogPostPredicates
             .hasSlug(slug);
 

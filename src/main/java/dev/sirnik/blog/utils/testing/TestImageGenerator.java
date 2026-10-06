@@ -44,7 +44,10 @@ public final class TestImageGenerator {
     private final Path outputDirectory;
     private final String publicPath;
 
-    public TestImageGenerator(Path outputDirectory, String publicPath) {
+    public TestImageGenerator(
+        Path outputDirectory,
+        String publicPath
+    ) {
         this.outputDirectory = outputDirectory.toAbsolutePath().normalize();
         this.publicPath = normalizePublicPath(publicPath);
 
@@ -52,11 +55,16 @@ public final class TestImageGenerator {
             Files.createDirectories(this.outputDirectory);
         } catch (IOException exception) {
             throw new UncheckedIOException(
-                "Could not create the generated image directory", exception);
+                "Could not create the generated image directory",
+                exception
+            );
         }
     }
 
-    public GeneratedTestImage generate(int seed, int imageIndex) {
+    public GeneratedTestImage generate(
+        int seed,
+        int imageIndex
+    ) {
         Scene scene = createScene(seed, imageIndex);
         String imageName = "test-image-" + Integer.toUnsignedString(seed) + "-"
             + imageIndex;
@@ -76,14 +84,22 @@ public final class TestImageGenerator {
             }
         }
 
-        return new GeneratedTestImage(fallbackSource,
+        return new GeneratedTestImage(
+            fallbackSource,
             String.join(", ", sourceSetEntries),
             "Abstract geometric test illustration " + (imageIndex + 1),
-            FALLBACK_WIDTH, heightFor(FALLBACK_WIDTH));
+            FALLBACK_WIDTH,
+            heightFor(FALLBACK_WIDTH)
+        );
     }
 
-    public void addRandomImage(Document document, BlogPost post, int seed,
-        int postIndex, Random randomiser) {
+    public void addRandomImage(
+        Document document,
+        BlogPost post,
+        int seed,
+        int postIndex,
+        Random randomiser
+    ) {
         GeneratedTestImage image = this.generate(seed, postIndex);
         Element figure = new Element("figure").addClass("generated-test-image");
         figure
@@ -105,8 +121,9 @@ public final class TestImageGenerator {
                 caption
                     .appendElement("span")
                     .addClass("generated-test-image__caption")
-                    .text("Generated sample image for “" + post.getTitle()
-                        + "”.");
+                    .text(
+                        "Generated sample image for “" + post.getTitle() + "”."
+                    );
             }
             if (includeCitation) {
                 caption.appendElement("cite").text("sirnik.Dev test generator");
@@ -117,51 +134,97 @@ public final class TestImageGenerator {
             .insertAtRandomPosition(document.body(), figure, randomiser, false);
     }
 
-    private Scene createScene(int seed, int imageIndex) {
+    private Scene createScene(
+        int seed,
+        int imageIndex
+    ) {
         Random random = new Random((long) seed + imageIndex);
         float baseHue = random.nextFloat();
         Color start = Color.getHSBColor(baseHue, 0.55f, 0.88f);
         Color end = Color
-            .getHSBColor((baseHue + 0.18f + random.nextFloat() * 0.24f) % 1.0f,
-                0.68f, 0.62f);
+            .getHSBColor(
+                (baseHue + 0.18f + random.nextFloat() * 0.24f) % 1.0f, 0.68f,
+                0.62f
+            );
 
         List<ShapeSpec> shapes = new ArrayList<>();
         for (int index = 0; index < 8; index++) {
             shapes
-                .add(new ShapeSpec(random.nextDouble(), random.nextDouble(),
-                    0.12 + random.nextDouble() * 0.32, random.nextFloat(),
-                    0.12f + random.nextFloat() * 0.24f, random.nextBoolean()));
+                .add(
+                    new ShapeSpec(
+                        random.nextDouble(),
+                        random.nextDouble(),
+                        0.12 + random.nextDouble() * 0.32,
+                        random.nextFloat(),
+                        0.12f + random.nextFloat() * 0.24f,
+                        random.nextBoolean()
+                    )
+                );
         }
 
-        return new Scene(start, end, List.copyOf(shapes));
+        return new Scene(
+            start,
+            end,
+            List.copyOf(shapes)
+        );
     }
 
-    private void render(Scene scene, int width, int height, Path outputFile) {
-        BufferedImage image = new BufferedImage(width, height,
-            BufferedImage.TYPE_INT_RGB);
+    private void render(
+        Scene scene,
+        int width,
+        int height,
+        Path outputFile
+    ) {
+        BufferedImage image = new BufferedImage(
+            width,
+            height,
+            BufferedImage.TYPE_INT_RGB
+        );
         Graphics2D graphics = image.createGraphics();
 
         try {
             graphics
-                .setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
+                .setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+                );
             graphics
-                .setPaint(new GradientPaint(0, 0, scene.startColor(), width,
-                    height, scene.endColor()));
+                .setPaint(
+                    new GradientPaint(
+                        0,
+                        0,
+                        scene.startColor(),
+                        width,
+                        height,
+                        scene.endColor()
+                    )
+                );
             graphics.fillRect(0, 0, width, height);
 
             for (ShapeSpec shape : scene.shapes()) {
                 Color color = Color.getHSBColor(shape.hue(), 0.42f, 1.0f);
                 graphics
-                    .setComposite(AlphaComposite
-                        .getInstance(AlphaComposite.SRC_OVER, shape.opacity()));
+                    .setComposite(
+                        AlphaComposite
+                            .getInstance(
+                                AlphaComposite.SRC_OVER, shape.opacity()
+                            )
+                    );
                 graphics.setColor(color);
 
                 double size = shape.size() * width;
                 double x = shape.x() * width - size / 2.0;
                 double y = shape.y() * height - size / 2.0;
                 if (shape.circle()) {
-                    graphics.fill(new Ellipse2D.Double(x, y, size, size));
+                    graphics
+                        .fill(
+                            new Ellipse2D.Double(
+                                x,
+                                y,
+                                size,
+                                size
+                            )
+                        );
                 } else {
                     Path2D triangle = new Path2D.Double();
                     triangle.moveTo(x + size / 2.0, y);
@@ -181,7 +244,9 @@ public final class TestImageGenerator {
             }
         } catch (IOException exception) {
             throw new UncheckedIOException(
-                "Could not write generated image " + outputFile, exception);
+                "Could not write generated image " + outputFile,
+                exception
+            );
         }
     }
 

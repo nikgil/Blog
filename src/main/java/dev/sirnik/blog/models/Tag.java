@@ -32,7 +32,10 @@ public class Tag {
     protected Tag() {
     }
 
-    public Tag(String name, String slug) {
+    public Tag(
+        String name,
+        String slug
+    ) {
         this.name = name;
         this.slug = slug;
     }

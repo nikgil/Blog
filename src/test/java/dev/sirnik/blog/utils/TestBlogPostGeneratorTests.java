@@ -27,23 +27,28 @@ class TestBlogPostGeneratorTests {
 
     @Test
     void sameSeedProducesTheSamePostsAndEnrichedContent() {
-        List<BlogPost> first = generatorFor(temporaryDirectory.resolve("first"),
-            5).generatePosts(1234);
+        List<BlogPost> first = generatorFor(
+            temporaryDirectory.resolve("first"), 5
+        ).generatePosts(1234);
         List<BlogPost> second = generatorFor(
-            temporaryDirectory.resolve("second"), 5).generatePosts(1234);
+            temporaryDirectory.resolve("second"), 5
+        ).generatePosts(1234);
 
         assertThat(first)
             .extracting(BlogPost::getTitle)
             .containsExactlyElementsOf(
-                second.stream().map(BlogPost::getTitle).toList());
+                second.stream().map(BlogPost::getTitle).toList()
+            );
         assertThat(first)
             .extracting(BlogPost::getSlug)
             .containsExactlyElementsOf(
-                second.stream().map(BlogPost::getSlug).toList());
+                second.stream().map(BlogPost::getSlug).toList()
+            );
         assertThat(first)
             .extracting(BlogPost::getContent)
             .containsExactlyElementsOf(
-                second.stream().map(BlogPost::getContent).toList());
+                second.stream().map(BlogPost::getContent).toList()
+            );
     }
 
     @Test
@@ -118,10 +123,14 @@ class TestBlogPostGeneratorTests {
         assertThat(citationCount).isBetween(1, imageCount - 1);
     }
 
-    private TestBlogPostGenerator generatorFor(Path imageDirectory,
-        int postCount) {
+    private TestBlogPostGenerator generatorFor(
+        Path imageDirectory,
+        int postCount
+    ) {
         TestImageGenerator imageGenerator = new TestImageGenerator(
-            imageDirectory, "/generated-test-images/");
+            imageDirectory,
+            "/generated-test-images/"
+        );
         return new TestBlogPostGenerator.Builder()
             .setPostsToGenerate(postCount)
             .setImageGenerator(imageGenerator)

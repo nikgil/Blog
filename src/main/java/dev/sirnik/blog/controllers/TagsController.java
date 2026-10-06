@@ -28,7 +28,9 @@ public class TagsController {
     public String getTags(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @ModelAttribute("filters") PostFilters filters,
-        @ModelAttribute("tagFilters") TagFilters tagFilters, Model model) {
+        @ModelAttribute("tagFilters") TagFilters tagFilters,
+        Model model
+    ) {
         page = Math.max(0, page);
         tagFilters.setTagPage(page);
 

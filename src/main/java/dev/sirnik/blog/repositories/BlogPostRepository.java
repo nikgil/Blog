@@ -38,7 +38,10 @@ public interface BlogPostRepository
         ORDER BY p.createdAt DESC, p.id DESC
         LIMIT 1
         """)
-    BlogPostLink findOlderPublished(Instant createdAt, Long id);
+    BlogPostLink findOlderPublished(
+        Instant createdAt,
+        Long id
+    );
 
     @Query("""
         SELECT p.title AS title, p.slug AS slug
@@ -51,7 +54,10 @@ public interface BlogPostRepository
         ORDER BY p.createdAt ASC, p.id ASC
         LIMIT 1
         """)
-    BlogPostLink findNewerPublished(Instant createdAt, Long id);
+    BlogPostLink findNewerPublished(
+        Instant createdAt,
+        Long id
+    );
 
     @Query("""
         SELECT

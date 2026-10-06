@@ -14,12 +14,16 @@ public class TestTagGenerator {
     private TestTagGenerator() {
     }
 
-    public static List<Tag> generateTags(TagRepository repository, int size,
-        int seed) {
+    public static List<Tag> generateTags(
+        TagRepository repository,
+        int size,
+        int seed
+    ) {
         Random randomizer = new Random(seed);
 
         List<String> orderedTagList = new ArrayList<>(
-            LoremIpsumGenerator.UNIQUE_WORDS);
+            LoremIpsumGenerator.UNIQUE_WORDS
+        );
         List<Tag> output = new ArrayList<>();
         List<Tag> newTags = new ArrayList<>();
 
@@ -34,7 +38,10 @@ public class TestTagGenerator {
             Optional<Tag> existingTag = repository.findBySlug(word);
 
             if (existingTag.isEmpty()) {
-                Tag newTag = new Tag(word, word);
+                Tag newTag = new Tag(
+                    word,
+                    word
+                );
                 newTags.add(newTag);
                 output.add(newTag);
             } else {

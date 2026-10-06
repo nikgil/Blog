@@ -187,7 +187,4 @@ sudo systemctl status sirnik-blog
 Back up PostgreSQL before deployments that introduce new Flyway migrations.
 
 ## TODO
-
 - [ ] Add editor
-- [ ] Add publish toggle
-- [ ] Add admin login

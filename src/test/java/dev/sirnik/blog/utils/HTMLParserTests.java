@@ -83,11 +83,15 @@ class HTMLParserTests {
             .parseBodyFragment("<p>First</p><pre>Code</pre><p>Last</p>");
 
         boolean insertedBefore = HTMLParser
-            .insertAtRandomPosition(beforeExisting.body(), new Element("pre"),
-                randomReturning(1), true);
+            .insertAtRandomPosition(
+                beforeExisting.body(), new Element("pre"), randomReturning(1),
+                true
+            );
         boolean insertedAfter = HTMLParser
-            .insertAtRandomPosition(afterExisting.body(), new Element("pre"),
-                randomReturning(2), true);
+            .insertAtRandomPosition(
+                afterExisting.body(), new Element("pre"), randomReturning(2),
+                true
+            );
 
         assertThat(insertedBefore).isFalse();
         assertThat(insertedAfter).isFalse();

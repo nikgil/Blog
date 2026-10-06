@@ -32,9 +32,12 @@ class BlogPostServiceTests {
     private final EntityManager entityManager;
 
     @Autowired
-    BlogPostServiceTests(BlogPostService blogPostService,
-        BlogPostRepository blogPostRepository, TagRepository tagRepository,
-        EntityManager entityManager) {
+    BlogPostServiceTests(
+        BlogPostService blogPostService,
+        BlogPostRepository blogPostRepository,
+        TagRepository tagRepository,
+        EntityManager entityManager
+    ) {
         this.blogPostService = blogPostService;
         this.blogPostRepository = blogPostRepository;
         this.tagRepository = tagRepository;
@@ -78,11 +81,11 @@ class BlogPostServiceTests {
 
         assertThat(blogPostService.findBySlug("live", null)).isPresent();
         assertThat(
-            blogPostService.findBySlug("live", authenticatedWith("ROLE_USER")))
-            .isPresent();
+            blogPostService.findBySlug("live", authenticatedWith("ROLE_USER"))
+        ).isPresent();
         assertThat(
-            blogPostService.findBySlug("live", authenticatedWith("ROLE_ADMIN")))
-            .isPresent();
+            blogPostService.findBySlug("live", authenticatedWith("ROLE_ADMIN"))
+        ).isPresent();
     }
 
     @Test
@@ -96,8 +99,10 @@ class BlogPostServiceTests {
     void findBySlugHidesDraftsFromSignedInNonAdmins() {
         savePost("Draft", "a-draft", false);
 
-        assertThat(blogPostService
-            .findBySlug("a-draft", authenticatedWith("ROLE_USER"))).isEmpty();
+        assertThat(
+            blogPostService
+                .findBySlug("a-draft", authenticatedWith("ROLE_USER"))
+        ).isEmpty();
     }
 
     @Test
@@ -129,10 +134,10 @@ class BlogPostServiceTests {
         assertThat(blogPostService.findBySlug("second", null))
             .map(BlogPost::getId)
             .contains(second.getId());
-        assertThat(blogPostService
-            .findBySlug("second", authenticatedWith("ROLE_ADMIN")))
-            .map(BlogPost::getId)
-            .contains(second.getId());
+        assertThat(
+            blogPostService
+                .findBySlug("second", authenticatedWith("ROLE_ADMIN"))
+        ).map(BlogPost::getId).contains(second.getId());
     }
 
     @Test
@@ -233,19 +238,42 @@ class BlogPostServiceTests {
 
     private static Authentication authenticatedWith(String... authorities) {
         return UsernamePasswordAuthenticationToken
-            .authenticated("someone", "password",
-                AuthorityUtils.createAuthorityList(authorities));
+            .authenticated(
+                "someone", "password",
+                AuthorityUtils.createAuthorityList(authorities)
+            );
     }
 
-    private BlogPost savePost(String title, String slug, boolean published) {
-        BlogPost post = new BlogPost(title, slug, "Article content.");
+    private BlogPost savePost(
+        String title,
+        String slug,
+        boolean published
+    ) {
+        BlogPost post = new BlogPost(
+            title,
+            slug,
+            "Article content."
+        );
         post.setPublished(published);
         return blogPostRepository.save(post);
     }
 
-    private void saveTaggedPost(String slug, boolean published) {
-        Tag spring = tagRepository.save(new Tag("Spring", "spring"));
-        BlogPost post = new BlogPost("Tagged", slug, "Article content.");
+    private void saveTaggedPost(
+        String slug,
+        boolean published
+    ) {
+        Tag spring = tagRepository
+            .save(
+                new Tag(
+                    "Spring",
+                    "spring"
+                )
+            );
+        BlogPost post = new BlogPost(
+            "Tagged",
+            slug,
+            "Article content."
+        );
         post.addTag(spring);
         post.setPublished(published);
         blogPostRepository.saveAndFlush(post);

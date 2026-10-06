@@ -34,7 +34,10 @@ public final class LoremIpsumGenerator {
         return getParagraphs(amount, false);
     }
 
-    public static String getParagraphs(int amount, boolean shouldFormatHTML) {
+    public static String getParagraphs(
+        int amount,
+        boolean shouldFormatHTML
+    ) {
         return cycle(PARAGRAPHS, amount, "\n\n", shouldFormatHTML);
     }
 
@@ -53,7 +56,9 @@ public final class LoremIpsumGenerator {
             text = Files.readString(path);
         } catch (IOException e) {
             throw new UncheckedIOException(
-                "Could not read classpath resource for Lorem Ipsum", e);
+                "Could not read classpath resource for Lorem Ipsum",
+                e
+            );
         } catch (URISyntaxException e) {
             throw new IllegalStateException("Invalid syntax for Lorem Ipsum");
         }
@@ -65,8 +70,12 @@ public final class LoremIpsumGenerator {
         return List.of(text.split("\\R\\s*\\R"));
     }
 
-    private static String cycle(List<String> values, int amount,
-        String separator, boolean wrapHTML) {
+    private static String cycle(
+        List<String> values,
+        int amount,
+        String separator,
+        boolean wrapHTML
+    ) {
         if (amount < 0) {
             throw new IllegalArgumentException("amount must be non-negative");
         }
