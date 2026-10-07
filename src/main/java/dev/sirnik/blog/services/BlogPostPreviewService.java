@@ -145,6 +145,9 @@ public class BlogPostPreviewService {
             );
     }
 
-    private record TimeFilter(Instant startTime, Instant endTime) {
+    private record TimeFilter(
+        Instant startTime,
+        Instant endTime
+    ) {
     }
 }

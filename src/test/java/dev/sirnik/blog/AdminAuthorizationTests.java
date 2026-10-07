@@ -77,6 +77,7 @@ class AdminAuthorizationTests {
     private static final String SLUG = "toggle-post";
     private static final String PUBLISH_URL = "/posts/" + SLUG + "/publish";
     private static final String ADMIN_USERNAME = "owner";
+    private static final String ADMIN_EMAIL = "test@test.xxx";
     private static final String ADMIN_PASSWORD = "correct horse battery";
 
     private final MockMvc mockMvc;
@@ -718,6 +719,7 @@ class AdminAuthorizationTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    ADMIN_EMAIL,
                     ADMIN_USERNAME,
                     passwordEncoder.encode(ADMIN_PASSWORD)
                 )

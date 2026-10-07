@@ -259,15 +259,29 @@ public final class TestImageGenerator {
         return normalized.endsWith("/") ? normalized : normalized + "/";
     }
 
-    private record Scene(Color startColor, Color endColor,
-        List<ShapeSpec> shapes) {
+    private record Scene(
+        Color startColor,
+        Color endColor,
+        List<ShapeSpec> shapes
+    ) {
     }
 
-    private record ShapeSpec(double x, double y, double size, float hue,
-        float opacity, boolean circle) {
+    private record ShapeSpec(
+        double x,
+        double y,
+        double size,
+        float hue,
+        float opacity,
+        boolean circle
+    ) {
     }
 
-    public static record GeneratedTestImage(String source, String sourceSet,
-        String altText, int width, int height) {
+    public static record GeneratedTestImage(
+        String source,
+        String sourceSet,
+        String altText,
+        int width,
+        int height
+    ) {
     }
 }

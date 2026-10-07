@@ -34,7 +34,7 @@ public class AdminUserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
         throws UsernameNotFoundException {
         AdminUser adminUser = adminUserRepository
-            .findByUsername(username)
+            .findActiveByLogin(username)
             .orElseThrow(
                 () -> new UsernameNotFoundException(
                     "No admin user named " + username

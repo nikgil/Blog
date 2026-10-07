@@ -44,6 +44,7 @@ class AdminUserServiceTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
@@ -63,6 +64,7 @@ class AdminUserServiceTests {
         AdminUser saved = adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
@@ -78,6 +80,7 @@ class AdminUserServiceTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
@@ -97,6 +100,7 @@ class AdminUserServiceTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )

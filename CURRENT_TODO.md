@@ -1,0 +1,9 @@
+- [x] Remove the code for single user loading
+- [x] Add registration form
+- [ ] Add email
+- [x] Add login changes (email, pwd)
+- [ ] Add verification
+- [x] Add indexes for username, email
+- [ ] Add way to delete users
+- [ ] Add cycled deletion for unverified users
+- [ ] throttling registration email

@@ -23,6 +23,9 @@ public class AdminUser {
     @Column(nullable = false, unique = true, length = 100)
     private String username;
 
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -39,9 +42,11 @@ public class AdminUser {
     }
 
     public AdminUser(
+        String email,
         String username,
         String passwordHash
     ) {
+        this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
     }
@@ -57,12 +62,20 @@ public class AdminUser {
         return id;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getUsername() {
         return username;
     }
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setPasswordHash(String passwordHash) {

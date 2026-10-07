@@ -11,6 +11,15 @@ import dev.sirnik.blog.models.AdminUser;
 
 public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
+    // Doing query since the method approach makes it way too long
+    @Query("select u from AdminUser u where (u.username = :login or u.email = :login) and u.activated = true")
+    Optional<AdminUser> findActiveByLogin(@Param("login") String login);
+
+    Optional<AdminUser> findByUsernameOrEmail(
+        String username,
+        String email
+    );
+
     Optional<AdminUser> findByUsername(String username);
 
     // Delete entries for all users that are not the current one

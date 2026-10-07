@@ -71,6 +71,11 @@
         </div>
       </div>
       </form>
+
+      <#-- "registrationEnabled" is the .env flag; until a controller puts it in the model the link stays hidden. -->
+      <#if registrationEnabled!false>
+        <p class="has-text-centered mt-4">Need an account? <a href="/register">Register</a></p>
+      </#if>
       </#if>
       </div>
       </main>
