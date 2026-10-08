@@ -20,8 +20,10 @@ import dev.sirnik.blog.repositories.AdminUserRepository;
  * runs and seeds the local login. The other test classes use the "test"
  * profile, which skips the seeding on purpose.
  */
+// The dev profile does not load application-test.properties, so give it the
+// values application.properties would otherwise read from a local .env.
 @SpringBootTest(properties = {"blog.registration.enabled=false",
-    "blog.registration.mail.port=587"})
+    "spring.mail.host=localhost", "spring.mail.port=1025"})
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
 class DevelopmentSeedUserTests {

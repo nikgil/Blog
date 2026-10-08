@@ -18,11 +18,10 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import dev.sirnik.blog.models.forms.RegistrationForm;
 
-// Only the boolean and int keys need a value here: an unresolved ${...}
-// placeholder fails binding for those types, but for Strings it just binds as
-// literal text. Setting them keeps this test independent of a local .env.
-@SpringBootTest(properties = {"blog.registration.enabled=true",
-    "blog.registration.mail.port=587"})
+// The test profile pins every blog.registration.* and mail setting so no local
+// .env is needed (see application-test.properties); only the flag under test
+// is overridden here.
+@SpringBootTest(properties = "blog.registration.enabled=true")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class RegistrationPageTests {

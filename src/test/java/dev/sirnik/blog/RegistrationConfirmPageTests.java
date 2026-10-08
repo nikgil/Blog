@@ -31,7 +31,6 @@ import dev.sirnik.blog.utils.JsonWebTokenUtils.JWTPayload;
  * and {@code @Transactional} rolls the pending user back after each test.
  */
 @SpringBootTest(properties = {"blog.registration.enabled=true",
-    "blog.registration.mail.port=587",
     "blog.registration.jwt=0123456789abcdef0123456789abcdef"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

@@ -25,8 +25,7 @@ import jakarta.persistence.EntityManager;
  * expired (one hour), and nothing else. {@code created_at} has no setter, so
  * each test back-dates the row with a native update after saving it.
  */
-@SpringBootTest(properties = {"blog.registration.enabled=false",
-    "blog.registration.mail.port=587"})
+@SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class ExpiredUserCleanupTests {
