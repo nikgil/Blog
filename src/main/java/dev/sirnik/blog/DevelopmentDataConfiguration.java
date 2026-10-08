@@ -11,11 +11,14 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import dev.sirnik.blog.models.AdminUser;
 import dev.sirnik.blog.models.BlogPost;
 import dev.sirnik.blog.models.Tag;
+import dev.sirnik.blog.repositories.AdminUserRepository;
 import dev.sirnik.blog.repositories.BlogPostRepository;
 import dev.sirnik.blog.repositories.TagRepository;
 import dev.sirnik.blog.utils.testing.TestBlogPostGenerator;
@@ -27,6 +30,9 @@ import dev.sirnik.blog.utils.testing.TestTagGenerator;
 public class DevelopmentDataConfiguration implements WebMvcConfigurer {
 
     private static final int TEST_DATA_SEED = 20_260_906;
+    private static final String DEV_USERNAME = "user";
+    private static final String DEV_EMAIL = "admin@sirnik.dev";
+    private static final String DEV_PASSWORD = "password";
     private static final Path GENERATED_IMAGE_DIRECTORY = Path
         .of("target", "generated-test-images")
         .toAbsolutePath()
@@ -51,6 +57,30 @@ public class DevelopmentDataConfiguration implements WebMvcConfigurer {
             GENERATED_IMAGE_DIRECTORY,
             GENERATED_IMAGE_PATH
         );
+    }
+
+    // Dev-only login (this class is skipped under the prod and test profiles).
+    // Created already activated, since nobody is around to approve it.
+    @Bean
+    ApplicationRunner seedAdminUser(
+        AdminUserRepository adminUserRepository,
+        PasswordEncoder passwordEncoder
+    ) {
+        return arguments -> {
+            // Same DevTools-restart guard as the posts: the in-memory H2
+            // database survives a restart, and username is unique.
+            if (adminUserRepository.findByUsername(DEV_USERNAME).isPresent()) {
+                return;
+            }
+
+            AdminUser devUser = new AdminUser(
+                DEV_EMAIL,
+                DEV_USERNAME,
+                passwordEncoder.encode(DEV_PASSWORD)
+            );
+            devUser.setActivated(true);
+            adminUserRepository.save(devUser);
+        };
     }
 
     @Bean

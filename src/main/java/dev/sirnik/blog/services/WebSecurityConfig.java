@@ -18,7 +18,7 @@ public class WebSecurityConfig {
         http
             .authorizeHttpRequests(
                 requests -> requests
-                    .requestMatchers("/posts/*/publish")
+                    .requestMatchers("/posts/*/publish", "/register/confirm")
                     .hasRole(AuthenticationUtils.ADMIN_ROLE.getAuthority())
                     .requestMatchers("/**")
                     .permitAll()

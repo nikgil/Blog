@@ -1570,8 +1570,11 @@ class BlogApplicationTests {
         return blogPostRepository.save(post);
     }
 
-    private record TestTagLink(String name, String slug,
-        long postCount) implements TagLink {
+    private record TestTagLink(
+        String name,
+        String slug,
+        long postCount
+    ) implements TagLink {
 
         @Override
         public String getSlug() {

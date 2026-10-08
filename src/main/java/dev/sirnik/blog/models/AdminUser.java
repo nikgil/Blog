@@ -23,6 +23,9 @@ public class AdminUser {
     @Column(nullable = false, unique = true, length = 100)
     private String username;
 
+    @Column(nullable = false, unique = true, length = 255)
+    private String email;
+
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -35,15 +38,21 @@ public class AdminUser {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(nullable = false)
+    private boolean activated;
+
     protected AdminUser() {
     }
 
     public AdminUser(
+        String email,
         String username,
         String passwordHash
     ) {
+        this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
+        this.activated = false;
     }
 
     @PrePersist
@@ -57,12 +66,24 @@ public class AdminUser {
         return id;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public String getUsername() {
         return username;
     }
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setActivated(boolean activated) {
+        this.activated = activated;
     }
 
     public void setPasswordHash(String passwordHash) {
@@ -84,6 +105,10 @@ public class AdminUser {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isActivated() {
+        return activated;
     }
 
     private static Instant currentTimestamp() {

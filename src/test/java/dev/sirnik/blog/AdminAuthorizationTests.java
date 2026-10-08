@@ -77,6 +77,7 @@ class AdminAuthorizationTests {
     private static final String SLUG = "toggle-post";
     private static final String PUBLISH_URL = "/posts/" + SLUG + "/publish";
     private static final String ADMIN_USERNAME = "owner";
+    private static final String ADMIN_EMAIL = "test@test.xxx";
     private static final String ADMIN_PASSWORD = "correct horse battery";
 
     private final MockMvc mockMvc;
@@ -714,13 +715,15 @@ class AdminAuthorizationTests {
         blogPostRepository.saveAndFlush(post);
     }
 
+    // Login only loads activated users (findActiveByLogin), so the account
+    // must be approved before form login can succeed.
     private void saveAdminUser() {
-        adminUserRepository
-            .saveAndFlush(
-                new AdminUser(
-                    ADMIN_USERNAME,
-                    passwordEncoder.encode(ADMIN_PASSWORD)
-                )
-            );
+        AdminUser admin = new AdminUser(
+            ADMIN_EMAIL,
+            ADMIN_USERNAME,
+            passwordEncoder.encode(ADMIN_PASSWORD)
+        );
+        admin.setActivated(true);
+        adminUserRepository.saveAndFlush(admin);
     }
 }

@@ -31,6 +31,10 @@
                  value="separate_lines_if_wrapped"/>
         <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_method_invocation"
                  value="separate_lines_if_wrapped"/>
+        <setting id="org.eclipse.jdt.core.formatter.alignment_for_record_components"
+                 value="49"/>
+        <setting id="org.eclipse.jdt.core.formatter.parentheses_positions_in_record_declaration"
+                 value="separate_lines_if_wrapped"/>
         <setting id="org.eclipse.jdt.core.compiler.compliance"
                  value="21"/>
         <setting id="org.eclipse.jdt.core.compiler.source"

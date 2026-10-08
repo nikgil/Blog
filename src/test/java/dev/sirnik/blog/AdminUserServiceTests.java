@@ -40,14 +40,14 @@ class AdminUserServiceTests {
     }
 
     @Test
-    void savedAdminUserLoadsWithHashAndAdminRole() {
-        adminUserRepository
-            .saveAndFlush(
-                new AdminUser(
-                    "owner",
-                    "{bcrypt}hash"
-                )
-            );
+    void activatedAdminUserLoadsWithHashAndAdminRole() {
+        AdminUser owner = new AdminUser(
+            "email",
+            "owner",
+            "{bcrypt}hash"
+        );
+        owner.setActivated(true);
+        adminUserRepository.saveAndFlush(owner);
 
         UserDetails details = adminUserService.loadUserByUsername("owner");
 
@@ -59,10 +59,46 @@ class AdminUserServiceTests {
     }
 
     @Test
+    void activatedAdminUserAlsoLoadsByEmail() {
+        AdminUser owner = new AdminUser(
+            "owner@example.com",
+            "owner",
+            "hash"
+        );
+        owner.setActivated(true);
+        adminUserRepository.saveAndFlush(owner);
+
+        UserDetails details = adminUserService
+            .loadUserByUsername("owner@example.com");
+
+        assertThat(details.getUsername()).isEqualTo("owner");
+    }
+
+    @Test
+    void pendingUserCannotBeLoadedForLogin() {
+        // Registered but not yet approved: activated defaults to false.
+        adminUserRepository
+            .saveAndFlush(
+                new AdminUser(
+                    "pending@example.com",
+                    "pending",
+                    "hash"
+                )
+            );
+
+        assertThatThrownBy(() -> adminUserService.loadUserByUsername("pending"))
+            .isInstanceOf(UsernameNotFoundException.class);
+        assertThatThrownBy(
+            () -> adminUserService.loadUserByUsername("pending@example.com")
+        ).isInstanceOf(UsernameNotFoundException.class);
+    }
+
+    @Test
     void newAdminUserGetsCreatedAtAndNoLoginTimes() {
         AdminUser saved = adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
@@ -78,6 +114,7 @@ class AdminUserServiceTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
@@ -97,6 +134,7 @@ class AdminUserServiceTests {
         adminUserRepository
             .saveAndFlush(
                 new AdminUser(
+                    "email",
                     "owner",
                     "{bcrypt}hash"
                 )
