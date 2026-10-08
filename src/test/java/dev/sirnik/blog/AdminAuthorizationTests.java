@@ -715,14 +715,15 @@ class AdminAuthorizationTests {
         blogPostRepository.saveAndFlush(post);
     }
 
+    // Login only loads activated users (findActiveByLogin), so the account
+    // must be approved before form login can succeed.
     private void saveAdminUser() {
-        adminUserRepository
-            .saveAndFlush(
-                new AdminUser(
-                    ADMIN_EMAIL,
-                    ADMIN_USERNAME,
-                    passwordEncoder.encode(ADMIN_PASSWORD)
-                )
-            );
+        AdminUser admin = new AdminUser(
+            ADMIN_EMAIL,
+            ADMIN_USERNAME,
+            passwordEncoder.encode(ADMIN_PASSWORD)
+        );
+        admin.setActivated(true);
+        adminUserRepository.saveAndFlush(admin);
     }
 }

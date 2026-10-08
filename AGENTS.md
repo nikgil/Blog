@@ -37,6 +37,8 @@ goals, not only for finishing features as quickly as possible.
   flow, dependency injection, MVC boundaries, persistence and transactions,
   testing, and htmx request/target/swap behavior. Keep explanations tied to the
   current change rather than giving broad lectures.
+- Answer the user's questions with explanations of 1-3 sentences at most, unless
+  they explicitly ask for more depth.
 - Prefer explicit, idiomatic code that makes the Spring and htmx mechanics easy
   to follow. Avoid abstractions that hide the behavior the project is intended
   to teach.

@@ -11,6 +11,14 @@ import dev.sirnik.blog.models.AdminUser;
 
 public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
+    boolean existsBy();
+
+    @Query("select u from AdminUser u where u.username = :username and u.email = :email and u.activated = false")
+    Optional<AdminUser> findInactiveForVerification(
+        @Param("username") String username,
+        @Param("email") String email
+    );
+
     // Doing query since the method approach makes it way too long
     @Query("select u from AdminUser u where (u.username = :login or u.email = :login) and u.activated = true")
     Optional<AdminUser> findActiveByLogin(@Param("login") String login);

@@ -43,8 +43,8 @@ class RegistrationPageTests {
 
         Document page = Jsoup.parse(result.getResponse().getContentAsString());
 
-        assertThat(page.select("form[action=/register][method=post]"))
-            .hasSize(1);
+        // register.ftl submits through htmx (hx-post), not a plain action.
+        assertThat(page.select("form[hx-post=/register]")).hasSize(1);
         assertThat(page.select("input#register-name[name=name][type=text]"))
             .hasSize(1);
         assertThat(page.select("input#register-email[name=email][type=email]"))

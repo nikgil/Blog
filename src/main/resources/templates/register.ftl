@@ -62,7 +62,7 @@
               <#else>
                 <h2 class="title is-3">Register</h2>
 
-                <form hx-post="/register" hx-target=".login-page" hw-select=".login-page">
+                <form hx-post="/register" hx-target=".login-page" hx-select=".login-page">
                   <@csrf.field />
 
                   <#-- Global (non-field) errors, e.g. a rate limit; field errors render under their own input. -->

@@ -28,7 +28,8 @@ public class RegistrationForm {
     }
 
     public void setEmail(String email) {
-        this.email = email == null ? null
+        this.email = email == null
+            ? null
             : email.trim().toLowerCase(Locale.ROOT);
     }
 

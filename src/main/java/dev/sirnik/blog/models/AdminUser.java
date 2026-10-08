@@ -38,6 +38,9 @@ public class AdminUser {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(nullable = false)
+    private boolean activated;
+
     protected AdminUser() {
     }
 
@@ -49,6 +52,7 @@ public class AdminUser {
         this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
+        this.activated = false;
     }
 
     @PrePersist
@@ -78,6 +82,10 @@ public class AdminUser {
         this.email = email;
     }
 
+    public void setActivated(boolean activated) {
+        this.activated = activated;
+    }
+
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
@@ -97,6 +105,10 @@ public class AdminUser {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isActivated() {
+        return activated;
     }
 
     private static Instant currentTimestamp() {
