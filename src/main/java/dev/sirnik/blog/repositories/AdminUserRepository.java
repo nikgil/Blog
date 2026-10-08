@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,6 +30,13 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
     );
 
     Optional<AdminUser> findByUsername(String username);
+
+    // One bulk DELETE instead of loading each row. A bulk query skips the
+    // persistence context, so flush pending inserts first and clear stale
+    // entities afterwards. Returns the number of rows removed.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("delete from AdminUser u where u.activated = false and u.createdAt < :cutoff")
+    int deleteInactiveCreatedBefore(@Param("cutoff") Instant cutoff);
 
     // Delete entries for all users that are not the current one
     void deleteByUsernameNot(String username);

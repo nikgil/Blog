@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -100,15 +101,38 @@ class RegistrationConfirmPageTests {
     }
 
     @Test
-    void visitorCannotUseAnApprovalLink() throws Exception {
+    void visitorIsRedirectedToLoginFromAnApprovalLink() throws Exception {
+        AdminUser pending = savePendingUser("ada", "ada@example.com");
+
+        // WebSecurityConfig guards /register/confirm with the ADMIN role, so
+        // the filter chain answers before the controller runs.
+        mockMvc
+            .perform(
+                get("/register/confirm")
+                    .param("confirmation", tokenFor(pending))
+            )
+            .andExpect(status().is3xxRedirection())
+            .andExpect(redirectedUrl("/login"));
+
+        assertThat(
+            adminUserRepository
+                .findByUsername("ada")
+                .orElseThrow()
+                .isActivated()
+        ).isFalse();
+    }
+
+    @Test
+    void signedInNonAdminIsForbiddenFromAnApprovalLink() throws Exception {
         AdminUser pending = savePendingUser("ada", "ada@example.com");
 
         mockMvc
             .perform(
                 get("/register/confirm")
                     .param("confirmation", tokenFor(pending))
+                    .with(user("reader").roles("USER"))
             )
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isForbidden());
 
         assertThat(
             adminUserRepository

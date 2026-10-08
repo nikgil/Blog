@@ -1,15 +1,18 @@
 package dev.sirnik.blog.services;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.sirnik.blog.models.AdminUser;
 import dev.sirnik.blog.models.forms.RegistrationForm;
 import dev.sirnik.blog.repositories.AdminUserRepository;
+import dev.sirnik.blog.utils.JsonWebTokenUtils;
 
 @Service
 public class UserRegistrationService {
@@ -73,6 +76,19 @@ public class UserRegistrationService {
         unwrapped.setActivated(true);
         adminUserRepository.save(unwrapped);
         return true;
+    }
+
+    /**
+     * Deletes unapproved users whose approval link has expired, i.e. created
+     * more than {@link JsonWebTokenUtils#MAX_TIME_VERIFY} before {@code now}.
+     * Activated users are never touched.
+     *
+     * @return how many users were deleted
+     */
+    @Transactional
+    public int deleteExpiredInactiveUsers(Instant now) {
+        Instant cutoff = now.minusMillis(JsonWebTokenUtils.MAX_TIME_VERIFY);
+        return adminUserRepository.deleteInactiveCreatedBefore(cutoff);
     }
 
     private static String encodePassword(String password) {

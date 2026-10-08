@@ -21,7 +21,9 @@ import dev.sirnik.blog.repositories.AdminUserRepository;
 
 public class JsonWebTokenUtils {
 
-    private static final long MAX_TIME_VERIFY = Duration.ofHours(1).toMillis();
+    // Also the lifetime of an unapproved registration: the startup cleanup
+    // deletes pending users older than this.
+    public static final long MAX_TIME_VERIFY = Duration.ofHours(1).toMillis();
 
     private JsonWebTokenUtils() {
     }
