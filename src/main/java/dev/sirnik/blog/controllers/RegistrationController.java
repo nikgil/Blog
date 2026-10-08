@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.nimbusds.jose.JOSEException;
 
+import dev.sirnik.blog.models.AdminUser;
 import dev.sirnik.blog.models.forms.RegistrationForm;
 import dev.sirnik.blog.repositories.AdminUserRepository;
 import dev.sirnik.blog.services.UserRegistrationService;
@@ -68,8 +69,12 @@ public class RegistrationController {
                 );
             model.addAttribute("registrationEnabled", true);
         } else {
-            regService.saveUser(form);
+            AdminUser user = regService.saveUser(form);
             model.addAttribute("registered", true);
+
+            if (!user.isActivated()) {
+                regService.sendConfirmationLink(user);
+            }
         }
 
         return "register";

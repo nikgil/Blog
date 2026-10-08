@@ -4,23 +4,38 @@ import java.time.Instant;
 import java.util.Optional;
 
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nimbusds.jose.JOSEException;
+
 import dev.sirnik.blog.models.AdminUser;
 import dev.sirnik.blog.models.forms.RegistrationForm;
 import dev.sirnik.blog.repositories.AdminUserRepository;
 import dev.sirnik.blog.utils.JsonWebTokenUtils;
+import dev.sirnik.blog.utils.JsonWebTokenUtils.JWTPayload;
+import dev.sirnik.blog.utils.RegistrationConfig;
 
 @Service
 public class UserRegistrationService {
 
     private final AdminUserRepository adminUserRepository;
+    private final JavaMailSender javaMailSender;
+    private final RegistrationConfig registrationConfig;
 
-    public UserRegistrationService(AdminUserRepository adminUserRepository) {
+    public UserRegistrationService(
+        AdminUserRepository adminUserRepository,
+        JavaMailSender javaMailSender,
+        RegistrationConfig registrationConfig
+    ) {
         this.adminUserRepository = adminUserRepository;
+        this.javaMailSender = javaMailSender;
+        this.registrationConfig = registrationConfig;
     }
 
     public boolean isValidRegistrationForm(RegistrationForm form) {
@@ -44,7 +59,44 @@ public class UserRegistrationService {
         return EmailValidator.getInstance().isValid(form.getEmail());
     }
 
-    public void saveUser(RegistrationForm form) {
+    @Async
+    public void sendConfirmationLink(AdminUser user) {
+        if (!registrationConfig.enabled()) {
+            return;
+        }
+
+        String confirmation;
+        try {
+            confirmation = JsonWebTokenUtils
+                .encodePayload(
+                    registrationConfig.jwt(), new JWTPayload(
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getCreatedAt().toEpochMilli()
+                    )
+                );
+        } catch (JOSEException e) {
+            return;
+        }
+
+        String fullURL = registrationConfig.url()
+            + "/register/confirm?confirmation=" + confirmation;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(registrationConfig.mail().approver());
+        message.setFrom(registrationConfig.mail().sender());
+        message.setSubject("Approval request for " + user.getUsername());
+        message
+            .setText(
+                "Please click the link to approve the user "
+                    + user.getUsername() + " with email " + user.getEmail()
+                    + ".\n" + "URL: " + fullURL
+            );
+
+        javaMailSender.send(message);
+    }
+
+    public AdminUser saveUser(RegistrationForm form) {
         String email = form.getEmail();
         String userName = form.getName();
         String password = encodePassword(form.getPassword());
@@ -63,6 +115,7 @@ public class UserRegistrationService {
         }
 
         adminUserRepository.save(newUser);
+        return newUser;
     }
 
     public boolean activateUser(String name) {

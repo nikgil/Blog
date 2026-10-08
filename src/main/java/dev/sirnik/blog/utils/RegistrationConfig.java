@@ -10,10 +10,6 @@ public record RegistrationConfig(
     String jwt
 ) {
     public record Mail(
-        String host,
-        int port,
-        String username,
-        String password,
         String approver,
         String sender
     ) {
